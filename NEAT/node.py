@@ -1,4 +1,4 @@
-from gene import *
+from .gene import *
 import math
 
 class Node(object):

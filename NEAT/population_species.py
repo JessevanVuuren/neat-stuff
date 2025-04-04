@@ -1,6 +1,6 @@
-from genome_history import *
-from species import *
-from genome import *
+from .genome_history import *
+from .species import *
+from .genome import *
 import random
 
 class XORsolver:

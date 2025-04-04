@@ -1,6 +1,6 @@
-from genome_history import *
-from gene import *
-from node import *
+from .genome_history import *
+from .gene import *
+from .node import *
 import random
 
 import numpy as np

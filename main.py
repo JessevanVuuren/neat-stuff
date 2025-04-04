@@ -1,6 +1,5 @@
-from genome_history import *
+from NEAT.genome_history import *
 from population import *
-from genome import *
 import time
 
 genome_history = GenomeHistory(2, 1)
@@ -21,17 +20,16 @@ for i in range(100):
 
     best_xor = pop.update(xor)
 
-    # if (pop.best_fitness > best):
-    #     best = pop.best_fitness
-    #     print()
-    #     print("Gen:",i, "Fitness:", pop.best_fitness)
-    #     for inputs, expected in xor:
-    #         out = best_xor.predict(inputs)
-    #         print(f"{inputs[0]} - {inputs[1]} => {out}, expected: {expected}, fit: {(out[0] - expected) ** 2}")
-    #     print()
-    # else:
-    print("Gen:",i, "Fitness:", pop.best_fitness)
-
+    if (pop.best_fitness > best):
+        best = pop.best_fitness
+        print()
+        print("Gen:",i, "Fitness:", pop.best_fitness)
+        for inputs, expected in xor:
+            out = best_xor.predict(inputs)
+            print(f"{inputs[0]} - {inputs[1]} => {out}, expected: {expected}, fit: {(out[0] - expected) ** 2}")
+        print()
+    else:
+        print("Gen:",i, "Fitness:", pop.best_fitness)
 
     pop.reset()
 

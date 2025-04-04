@@ -1,6 +1,6 @@
 import numpy as np
-from gene import *
-from node import *
+from .gene import *
+from .node import *
 
 
 class GenomeHistory(object):

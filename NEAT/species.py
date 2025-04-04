@@ -1,4 +1,4 @@
-from genome import Genome
+from .genome import Genome
 import random
 
 
