@@ -1,0 +1,3 @@
+https://github.com/kshitijaucharmal/FlappyNEAT/blob/main/game/Bird.py
+https://github.com/kshitijaucharmal/NEAT-Python/blob/main/neat/genome.py#L205
+https://www.youtube.com/watch?v=yVtdp1kF0I4&ab_channel=DavidSch%C3%A4fer
