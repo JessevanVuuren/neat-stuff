@@ -33,12 +33,6 @@ class Genome:
             self.nodes.append(Node(self.total_nodes, 1))
             self.total_nodes += 1
 
-        bias = Node(self.total_nodes, 0, is_bias=True)
-        bias.output = 1.0
-        self.nodes.append(bias)
-        self.bias_node_index = self.total_nodes
-        self.total_nodes += 1
-
     def clone(self):
         clone = Genome(self.genome_history)
         clone.total_nodes = self.total_nodes
@@ -93,7 +87,7 @@ class Genome:
                 self.genes[i].mutate()
         if random.random() < 0.08:
             self.add_gene()
-        if random.random() < 1:
+        if random.random() < 0.02:
             self.add_node()
 
     def get_node(self, n):
@@ -130,25 +124,23 @@ class Genome:
         for i in range(self.inputs):
             self.nodes[i].output = inputs[i]
 
-        for node in self.nodes:
-            if node.is_bias:
-                node.output = 1.0
-
         self.connect_genes()
 
-        # Calculate hidden layers
-        for layer in range(1, self.genome_history.highest_hidden + 1):
-            nodes_in_layer = [n for n in self.nodes if n.layer == layer]
-            for node in nodes_in_layer:
-                node.calculate()
+        for layer in range(2, self.genome_history.highest_hidden + 1):
+            nodes_in_layer = []
+            for n in range(len(self.nodes)):
+                if self.nodes[n].layer == layer:
+                    nodes_in_layer.append(self.nodes[n])
 
-        # Collect final output
+            for n in range(len(nodes_in_layer)):
+                nodes_in_layer[n].calculate()
+
         final_outputs = []
         for n in range(self.inputs, self.inputs + self.outputs):
+            self.nodes[n].calculate()
             final_outputs.append(self.nodes[n].output)
 
         return final_outputs
-
 
     def exists(self, nn):
         for c in self.genes:

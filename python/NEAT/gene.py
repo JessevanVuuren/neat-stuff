@@ -26,14 +26,3 @@ class Gene(object):
         gene.innovation = self.innovation
         gene.enabled = self.enabled
         return gene
-
-    def get_info(self):
-        s = str(self.innovation) + "] "
-        s += str(self.in_node.number) + "(" + str(self.in_node.layer) + ") -> "
-        s += str(self.out_node.number) + "(" + str(self.out_node.layer) + ") "
-        s += str(self.weight) + " "
-        s += str(self.enabled) + "\n"
-        return s
-
-    def __str__(self) -> str:
-        return self.get_info()
