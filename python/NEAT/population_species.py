@@ -83,7 +83,7 @@ class Population:
 
         for sp in self.species:
             sp_fitness = sum(m.adjusted_fitness for m in sp.members)
-            sp.allow_offspring = round((sp_fitness / total_adjusted) * self.pop_size)
+            sp.allow_offspring = round((sp_fitness / (total_adjusted + 1e-05)) * self.pop_size)
 
     def reset(self):
         self.generation += 1

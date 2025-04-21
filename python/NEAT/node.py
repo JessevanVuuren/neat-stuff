@@ -1,14 +1,15 @@
 from .gene import *
 import math
 
-class Node(object):
+
+class Node:
     def __init__(self, n, l) -> None:
         self.number = n
-        self.layer = l # type -> input, hidden bias
+        self.layer = l  # type -> input, hidden bias
 
         self.output = 0
 
-        self.genes:list[Gene] = [] # type: ignore
+        self.genes: list[Gene] = []  # type: ignore
 
         self.sigmoid = lambda x: 1 / (1 + math.exp(-x))
 

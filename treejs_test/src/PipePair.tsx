@@ -10,8 +10,8 @@ interface PipePairProps {
 
 const PipePair = (props: PipePairProps) => {
 
-  const pipe_up = { x: 1400, y: 0, z: 0 };
-  const pipe_down = { x: 1400, y: 0, z: 0 }
+  const pipe_up = { x: 0, y: 0, z: 0 };
+  const pipe_down = { x: 0, y: 0, z: 0 }
 
   pipe_up.y = -props.gap_pos
   pipe_down.y = -props.gap_pos - props.gap_size

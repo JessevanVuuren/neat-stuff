@@ -1,5 +1,5 @@
 from NEAT.genome_history import *
-from NEAT.population import *
+from NEAT.population_bird import *
 from NEAT.genome import *
 
 import random
@@ -18,7 +18,7 @@ dt = 0
 
 pipe_speed = 200
 pipe_width = 50
-pipe_gap = 40
+pipe_gap = 100
 pipe_gap_between = 300
 pipe_color = "#E9C46A"
 

@@ -68,16 +68,6 @@ class Genome:
             self.genome_history.all_genes.append(x)
             self.genes.append(x)
 
-    def add_gene(self):
-        n1 = random.choice(self.nodes)
-        n2 = random.choice(self.nodes)
-
-        while n1.layer == n2.layer or (n2.layer == 0):
-            n1 = random.choice(self.nodes)
-            n2 = random.choice(self.nodes)
-
-        self.connect_nodes(n1, n2)
-
     def mutate(self):
         if len(self.genes) == 0:
             self.add_gene()
@@ -89,6 +79,54 @@ class Genome:
             self.add_gene()
         if random.random() < 0.02:
             self.add_node()
+
+    def add_gene(self):
+        n1 = random.choice(self.nodes)
+        n2 = random.choice(self.nodes)
+
+        while n1.layer == n2.layer or (n2.layer == 0):
+            n1 = random.choice(self.nodes)
+            n2 = random.choice(self.nodes)
+
+        self.connect_nodes(n1, n2)
+
+    def add_node(self):
+        if len(self.genes) == 0:
+            self.add_gene()
+
+        if random.random() < 0.2:
+            self.genome_history.highest_hidden += 1
+
+        n = Node(self.total_nodes, random.randint(2, self.genome_history.highest_hidden))
+        self.total_nodes += 1
+
+        g = random.choice(self.genes)
+        l1 = g.in_node.layer
+        l2 = g.out_node.layer
+        if l2 == 1:
+            l2 = 1000000
+
+        attempts = 0
+        max_attempts = 100
+
+        while (l1 > n.layer or l2 < n.layer) and attempts < max_attempts:
+            g = random.choice(self.genes)
+            l1 = g.in_node.layer
+            l2 = g.out_node.layer
+            if l2 == 1:
+                l2 = 1000000
+            attempts += 1
+
+        if attempts == max_attempts:
+            return  # could not find a valid gene, safely abort
+
+        self.connect_nodes(g.in_node, n)
+        self.connect_nodes(n, g.out_node)
+
+        self.genes[-1].weight = 1.0
+        self.genes[-2].weight = g.weight
+        g.enabled = False
+        self.nodes.append(n)
 
     def get_node(self, n):
         for i in range(len(self.nodes)):
@@ -170,12 +208,14 @@ class Genome:
 
         if self.total_nodes > partner.total_nodes:
             child.total_nodes = self.total_nodes
-            for i in range(self.total_nodes):
-                child.nodes.append(self.nodes[i].clone())
+            for node in self.nodes:
+                child.nodes.append(node.clone())
+            # for i in range(self.total_nodes):
+            #     child.nodes.append(self.nodes[i].clone())
         else:
             child.total_nodes = partner.total_nodes
-            for i in range(partner.total_nodes):
-                child.nodes.append(partner.nodes[i].clone())
+            for node in partner.nodes:
+                child.nodes.append(node.clone())
 
         highest_innovation = (
             p1_highest_innovation if self.fitness > partner.fitness else p2_highest_innovation
@@ -255,34 +295,3 @@ class Genome:
         delta = E + D + W
 
         return delta
-
-    def add_node(self):
-        if len(self.genes) == 0:
-            self.add_gene()
-
-        if random.random() < 0.2:
-            self.genome_history.highest_hidden += 1
-
-        n = Node(self.total_nodes, random.randint(2, self.genome_history.highest_hidden))
-        self.total_nodes += 1
-
-        g = random.choice(self.genes)
-        l1 = g.in_node.layer
-        l2 = g.out_node.layer
-        if l2 == 1:
-            l2 = 1000000
-
-        while l1 > n.layer or l2 < n.layer:
-            g = random.choice(self.genes)
-            l1 = g.in_node.layer
-            l2 = g.out_node.layer
-            if l2 == 1:
-                l2 = 1000000
-
-        self.connect_nodes(g.in_node, n)
-        self.connect_nodes(n, g.out_node)
-
-        self.genes[-1].weight = 1.0
-        self.genes[-2].weight = g.weight
-        g.enabled = False
-        self.nodes.append(n)
