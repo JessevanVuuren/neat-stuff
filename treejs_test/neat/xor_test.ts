@@ -1,7 +1,12 @@
+import { Profiler } from "./profiler.ts";
 import { Genome } from "./genome.ts";
 import { GenomeHistory } from "./genome_history.ts";
 import { Population } from "./population.ts";
-import { XorInputs } from "./utils.ts";
+
+export interface XorInputs {
+  inputs: number[]
+  expected: number
+}
 
 export class XORsolver {
   public fitness = 0
@@ -33,7 +38,7 @@ export class XORsolver {
   }
 
   public predict(inputs: number[]) {
-    return this.brian.get_outputs(inputs)
+    return Profiler.time("predict", () => this.brian.get_outputs(inputs)) 
   }
 
   public info(xor: XorInputs[], show_output = false) {
@@ -70,7 +75,7 @@ const start = performance.now()
 
 for (let i = 0; i < 100; i++) {
 
-  const best = pop.update(xor)
+  const best = Profiler.time("best", () => pop.update(xor))
 
   if (best.fitness > highest_fitness) {
     highest_fitness = best.fitness
@@ -79,7 +84,7 @@ for (let i = 0; i < 100; i++) {
     best.info(xor)
   }
 
-  pop.reset()
+  Profiler.time("reset", () => pop.reset())
 
 }
 
@@ -89,4 +94,7 @@ pop.global_best.brian.debug_info()
 genome_history.debug_info()
 
 const end = performance.now()
-console.log(`Run took ${end - start} ms`)
+Profiler.record("main", end - start)
+console.log()
+
+Profiler.debug()

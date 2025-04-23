@@ -1,4 +1,5 @@
 import { GenomeHistory } from "./genome_history.ts";
+import { Profiler } from "./profiler.ts";
 import { XORsolver } from "./xor_test.ts";
 
 export class Population {
@@ -39,13 +40,14 @@ export class Population {
       child.brian.mutate()
       this.population.push(child)
     }
+
   }
 
   public update(inputs) {
     this.local_best = this.population[0]
 
     this.population.forEach((agent) => {
-      const fitness = agent.calculate_fitness(inputs)
+      const fitness = Profiler.time("update", () => agent.calculate_fitness(inputs))
 
       if (fitness > this.local_best.fitness) this.local_best = agent
       if (fitness > this.global_best.fitness) this.global_best = agent

@@ -1,6 +1,7 @@
 import { Gene } from "./gene.ts"
 import { GenomeHistory } from "./genome_history.ts"
 import { Node } from "./node.ts"
+import { Profiler } from "./profiler.ts"
 
 export class Genome {
   private inputs: number
@@ -122,23 +123,29 @@ export class Genome {
   }
 
   private get_node(node_number: number): Node | undefined {
-    const node = this.nodes.find(node => node.number === node_number)
+    return Profiler.time("get_node", () => {
 
-    if (!node) {
-      throw new Error(`Node not found: Something's wrong — ${node_number}`)
-    }
-
-    return node
+      const node = this.nodes.find(node => node.number === node_number)
+      
+      if (!node) {
+        throw new Error(`Node not found: Something's wrong — ${node_number}`)
+      }
+      
+      return node
+    })
   }
 
   private get_gene(innovation: number) {
-    const gene = this.genes.find(gene => gene.innovation === innovation)
+    return Profiler.time("get_gene", () => {
 
-    if (!gene) {
-      throw new Error(`Gene not found: Something's wrong — ${innovation}`)
-    }
-
-    return gene.clone()
+      const gene = this.genes.find(gene => gene.innovation === innovation)
+      
+      if (!gene) {
+        throw new Error(`Gene not found: Something's wrong — ${innovation}`)
+      }
+      
+      return gene.clone()
+    })
   }
 
   private connect_genes() {
@@ -169,7 +176,6 @@ export class Genome {
 
     this.connect_genes()
 
-
     for (let layer = 2; layer < this.genome_history.highest_hidden + 1; layer++) {
       const nodes_in_layers = this.nodes.filter(node => node.layer === layer)
       nodes_in_layers.forEach(node => node.calculate())
@@ -185,12 +191,14 @@ export class Genome {
   }
 
   private exists(innovation: number) {
-    return this.genes.some(gene => gene.innovation == innovation)
+    return Profiler.time("exists", () => this.genes.some(gene => gene.innovation == innovation))
   }
 
   private get_weight(innovation: number) {
-    const gene = this.genes.find(gene => gene.innovation === innovation)
-    return gene ? gene.weight : -1
+    return Profiler.time("get_weight", () => {
+      const gene = this.genes.find(gene => gene.innovation === innovation)
+      return gene ? gene.weight : -1
+    })
   }
 
   private get_highest_innovation(genes: Gene[]): number {

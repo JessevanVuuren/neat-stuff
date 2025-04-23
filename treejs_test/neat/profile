@@ -1,0 +1,13 @@
+
+[Genome] Size Nodes:  30
+[Genome] Size Genes:  279
+[GenomeHistory] Size Genes:  369
+
+Count: 2640635  | Avg: 0.002    ms | Total: 6549.417    ms | Sec: 6.549         | [ exists ]
+Count: 11181716 | Avg: 0.005    ms | Total: 52453.909   ms | Sec: 52.454        | [ get_node ]
+Count: 1139466  | Avg: 0.003    ms | Total: 3650.763    ms | Sec: 3.651         | [ get_gene ]
+Count: 40056    | Avg: 2.093    ms | Total: 83821.688   ms | Sec: 83.822        | [ predict ]
+Count: 10000    | Avg: 8.393    ms | Total: 83931.356   ms | Sec: 83.931        | [ update ]
+Count: 100      | Avg: 839.913  ms | Total: 83991.304   ms | Sec: 83.991        | [ best ]
+Count: 100      | Avg: 424.213  ms | Total: 42421.326   ms | Sec: 42.421        | [ reset ]
+Count: 1        | Avg: 126630.0 ms | Total: 126630.666  ms | Sec: 126.631       | [ main ]
