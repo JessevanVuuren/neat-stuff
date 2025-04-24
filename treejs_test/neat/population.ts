@@ -51,7 +51,6 @@ export class Population {
 
       if (fitness > this.local_best.fitness) this.local_best = agent
       if (fitness > this.global_best.fitness) this.global_best = agent
-
     })
 
     return this.local_best

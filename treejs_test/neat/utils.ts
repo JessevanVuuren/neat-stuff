@@ -13,3 +13,9 @@ export class Arr {
     return arr.reduce((a, b) => a + b)
   }
 }
+
+export class Num {
+  static fix_num(n:number, fix=3) {
+    return parseFloat(n.toFixed(fix))
+  }
+}

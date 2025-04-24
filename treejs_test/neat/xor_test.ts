@@ -13,10 +13,13 @@ export class XORsolver {
   public generation = 0
   public brian: Genome
 
-  constructor(private genome_history: GenomeHistory) {
-    this.brian = new Genome(genome_history)
-    for (let i = 0; i < 10; i++) {
-      this.brian.mutate()
+  constructor(private genome_history: GenomeHistory, private brain_clone = false) {
+
+    if (!brain_clone) {
+      this.brian = new Genome(genome_history)
+      for (let i = 0; i < 10; i++) {
+        this.brian.mutate()
+      }
     }
   }
 
@@ -26,36 +29,39 @@ export class XORsolver {
     return xor
   }
 
-  public calculate_fitness(inputs: XorInputs[]) {
+  public clone() {
+    const xor = new XORsolver(this.genome_history, true)
+    xor.generation = this.generation
+    xor.brian = this.brian.clone()
+    xor.fitness = this.fitness
+    return xor
+  }
+
+  public calculate_fitness(inputs: XorInputs[], info = false) {
     let total_error = 4
     for (let i = 0; i < inputs.length; i++) {
       const out = this.predict(inputs[i].inputs)
-      total_error -= Math.pow(out[0] - inputs[i].expected, 2)
-    }
-    this.fitness = total_error
+      const error = Math.pow(out[0] - inputs[i].expected, 2)
+      total_error -= error
 
+      if (info) this.display_results(inputs[i], out[0], error)
+    }
+    this.brian.fitness = total_error
+    this.fitness = total_error
     return this.fitness
   }
 
-  public predict(inputs: number[]) {
-    return Profiler.time("predict", () => this.brian.get_outputs(inputs)) 
+  private display_results(xor: XorInputs, out: number, error: number) {
+    console.log(xor.inputs, "=", xor.expected, "=>", out, " fit:", error)
   }
 
-  public info(xor: XorInputs[], show_output = false) {
+  public predict(inputs: number[]) {
+    return Profiler.time("predict", () => this.brian.get_outputs(inputs))
+  }
 
-    if (!show_output) {
-      console.log("Gen:", this.generation, "Fitness:", this.fitness)
-    }
-
-    if (show_output) {
-      console.log()
-      console.log("Gen:", this.generation, "Fitness:", this.fitness)
-      for (let i = 0; i < xor.length; i++) {
-        const out = this.predict(xor[i].inputs)
-        console.log(xor[i].inputs, " - ", xor[i].expected, " => ", out, " expected: ", xor[i].expected, " fit: ", Math.pow(out[0] - xor[i].expected, 2))
-      }
-      console.log()
-    }
+  public info(xor: XorInputs[], result = false) {
+    const fitness = this.calculate_fitness(xor, result)
+    console.log("Gen:", this.generation, "Fitness:", fitness)
   }
 }
 
@@ -68,18 +74,18 @@ const xor: XorInputs[] = [
 
 const genome_history = new GenomeHistory(2, 1)
 const pop = new Population(genome_history, 100, XORsolver)
-let highest_fitness = -1
+Profiler.enable = false
 
 const start = performance.now()
-
 
 for (let i = 0; i < 100; i++) {
 
   const best = Profiler.time("best", () => pop.update(xor))
 
-  if (best.fitness > highest_fitness) {
-    highest_fitness = best.fitness
+  if (best.fitness == pop.global_best.fitness) {
+    console.log()
     best.info(xor, true)
+    console.log()
   } else {
     best.info(xor)
   }
@@ -90,8 +96,10 @@ for (let i = 0; i < 100; i++) {
 
 console.log()
 pop.global_best.info(xor, true)
+console.log()
 pop.global_best.brian.debug_info()
 genome_history.debug_info()
+console.log()
 
 const end = performance.now()
 Profiler.record("main", end - start)

@@ -11,7 +11,7 @@ export class Genome {
 
   private nodes: Node[] = []
   private genes: Gene[] = []
-  private fitness = Math.random() * 200
+  public fitness = 0
 
   constructor(private genome_history: GenomeHistory) {
     this.inputs = genome_history.inputs
@@ -33,9 +33,10 @@ export class Genome {
     console.log("[Genome] Size Genes: ", this.genes.length)
   }
 
-  private clone() {
+  public clone() {
     const clone = new Genome(this.genome_history)
     clone.total_nodes = this.total_nodes
+    clone.fitness = this.fitness
 
     clone.nodes = this.nodes.map(node => node.clone())
     clone.genes = this.genes.map(gene => gene.clone())
@@ -170,9 +171,16 @@ export class Genome {
       throw new Error("Wrong number of inputs")
     }
 
+
+    this.nodes.forEach(node => {
+      node.output = 0
+      node.genes = []
+    })
+
     for (let i = 0; i < this.inputs; i++) {
       this.nodes[i].output = nn_inputs[i]
     }
+
 
     this.connect_genes()
 

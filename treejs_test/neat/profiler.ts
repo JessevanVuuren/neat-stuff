@@ -1,15 +1,18 @@
-import { Arr, Call } from "./utils.ts"
+import { Arr, Call, Num } from "./utils.ts"
 
 export class Profiler {
   static measurements: Map<string, Call> = new Map()
+  static enable = true
 
   private constructor() { }
 
   static time<T>(key: string, fn: () => T): T {
-    // const start = performance.now()
-    // const end = performance.now()
-    // this.record(key, end - start)
+    if (!this.enable) return fn() // return early if disabled
+    
+    const start = performance.now()
     const result = fn()
+    const end = performance.now()
+    this.record(key, end - start)
     return result
   }
 
@@ -28,13 +31,9 @@ export class Profiler {
 
   static debug() {
     this.measurements.forEach(m => {
-      const avg = this.fix_num(Arr.avg(m.times))
-      const sum = this.fix_num(Arr.sum(m.times))
-      console.log("Count:", m.times.length, "\t| Avg:", avg, "\tms | Total:", sum, "\tms", "| Sec:", this.fix_num(sum / 1000), "\t| [", m.name, "]")
+      const avg = Num.fix_num(Arr.avg(m.times))
+      const sum = Num.fix_num(Arr.sum(m.times))
+      console.log("Count:", m.times.length, "\t| Avg:", avg, "\tms | Total:", sum, "\tms", "| Sec:", Num.fix_num(sum / 1000), "\t| [", m.name, "]")
     })
-  }
-
-  static fix_num(n:number, fix=3) {
-    return parseFloat(n.toFixed(fix))
   }
 }
