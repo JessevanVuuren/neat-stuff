@@ -9,8 +9,11 @@ export class Genome {
 
   private total_nodes = 0
 
-  private nodes: Node[] = []
+  // private nodes: Node[] = []
+  private nodes: Map<number, Node> = new Map()
+
   private genes: Gene[] = []
+
   public fitness = 0
 
   constructor(private genome_history: GenomeHistory) {
@@ -18,18 +21,18 @@ export class Genome {
     this.outputs = genome_history.outputs
 
     for (let i = 0; i < this.inputs; i++) {
-      this.nodes.push(new Node(this.total_nodes, 0))
+      this.nodes.set(this.total_nodes, new Node(this.total_nodes, 0))
       this.total_nodes++
     }
 
     for (let i = 0; i < this.outputs; i++) {
-      this.nodes.push(new Node(this.total_nodes, 1))
+      this.nodes.set(this.total_nodes, new Node(this.total_nodes, 1))
       this.total_nodes++
     }
   }
 
   public debug_info() {
-    console.log("[Genome] Size Nodes: ", this.nodes.length)
+    console.log("[Genome] Size Nodes: ", this.nodes.size)
     console.log("[Genome] Size Genes: ", this.genes.length)
   }
 
@@ -38,7 +41,9 @@ export class Genome {
     clone.total_nodes = this.total_nodes
     clone.fitness = this.fitness
 
-    clone.nodes = this.nodes.map(node => node.clone())
+    clone.nodes.clear()
+    this.nodes.forEach(node => clone.nodes.set(node.number, node))
+    // clone.nodes = this.nodes.map(node => node.clone())
     clone.genes = this.genes.map(gene => gene.clone())
 
     clone.connect_genes()
@@ -70,13 +75,18 @@ export class Genome {
     }
   }
 
+  private random_node(): Node {
+    const keys = Array.from(this.nodes.keys())
+    return this.nodes.get(keys[Math.floor(Math.random() * keys.length)])
+  }
+
   private add_gene() {
-    let n1 = this.nodes[Math.floor(Math.random() * this.nodes.length)]
-    let n2 = this.nodes[Math.floor(Math.random() * this.nodes.length)]
+    let n1 = this.random_node()
+    let n2 = this.random_node()
 
     while (n1.layer === n2.layer || n2.layer === 0) {
-      n1 = this.nodes[Math.floor(Math.random() * this.nodes.length)]
-      n2 = this.nodes[Math.floor(Math.random() * this.nodes.length)]
+      n1 = this.random_node()
+      n2 = this.random_node()
     }
 
     this.connect_nodes(n1, n2)
@@ -113,7 +123,7 @@ export class Genome {
     if (second_to_last) second_to_last.weight = gene.weight
 
     gene.enabled = false
-    this.nodes.push(node)
+    this.nodes.set(node.number, node)
   }
 
   public mutate() {
@@ -125,13 +135,16 @@ export class Genome {
 
   private get_node(node_number: number): Node | undefined {
     return Profiler.time("get_node", () => {
-
-      const node = this.nodes.find(node => node.number === node_number)
+      
+      // const node = this.nodes.find(node => node.number === node_number)
+      const node = this.nodes.get(node_number)
       
       if (!node) {
+        console.log(node_number)
+        console.log(this.nodes)
         throw new Error(`Node not found: Something's wrong — ${node_number}`)
       }
-      
+
       return node
     })
   }
@@ -140,11 +153,11 @@ export class Genome {
     return Profiler.time("get_gene", () => {
 
       const gene = this.genes.find(gene => gene.innovation === innovation)
-      
+
       if (!gene) {
         throw new Error(`Gene not found: Something's wrong — ${innovation}`)
       }
-      
+
       return gene.clone()
     })
   }
@@ -178,21 +191,25 @@ export class Genome {
     })
 
     for (let i = 0; i < this.inputs; i++) {
-      this.nodes[i].output = nn_inputs[i]
+      this.nodes.get(i).output = nn_inputs[i]
     }
 
 
     this.connect_genes()
 
     for (let layer = 2; layer < this.genome_history.highest_hidden + 1; layer++) {
-      const nodes_in_layers = this.nodes.filter(node => node.layer === layer)
+      // const nodes_in_layers = this.nodes.filter(node => node.layer === layer)
+      const nodes_in_layers: Node[] = []
+      this.nodes.forEach(node => {
+        if (node.layer == layer) nodes_in_layers.push(node)
+      })
       nodes_in_layers.forEach(node => node.calculate())
     }
 
     const final_outputs: number[] = []
     for (let i = this.inputs; i < this.inputs + this.outputs; i++) {
-      this.nodes[i].calculate()
-      final_outputs.push(this.nodes[i].output)
+      this.nodes.get(i).calculate()
+      final_outputs.push(this.nodes.get(i).output)
     }
 
     return final_outputs
@@ -217,7 +234,7 @@ export class Genome {
 
   public crossover(partner: Genome) {
     const child = new Genome(this.genome_history)
-    child.nodes = []
+    child.nodes.clear()
 
     const more_fit = this.fitness > partner.fitness ? this : partner;
     const less_fit = this.fitness > partner.fitness ? partner : this;
@@ -225,12 +242,12 @@ export class Genome {
     if (this.total_nodes > partner.total_nodes) {
       child.total_nodes = this.total_nodes;
       for (let i = 0; i < this.total_nodes; i++) {
-        child.nodes.push(this.nodes[i].clone());
+        child.nodes.set(i, this.nodes.get(i).clone());
       }
     } else {
       child.total_nodes = partner.total_nodes;
       for (let i = 0; i < partner.total_nodes; i++) {
-        child.nodes.push(partner.nodes[i].clone());
+        child.nodes.set(i, partner.nodes.get(i).clone());
       }
     }
 

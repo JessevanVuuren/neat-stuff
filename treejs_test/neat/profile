@@ -19,10 +19,10 @@ Count: 1        | Avg: 126630.0 ms | Total: 126630.666  ms | Sec: 126.631       
 [GenomeHistory] Size Genes:  388
 Count: 2845989  | Avg: 0.002    ms | Total: 6317.355    ms | Sec: 6.317         | [ exists ]
 Count: 12202994 | Avg: 0.004    ms | Total: 52603.569   ms | Sec: 52.604        | [ get_node ]
+Count: 1244937  | Avg: 0.003    ms | Total: 3736.402    ms | Sec: 3.736         | [ get_gene ]
 Count: 40036    | Avg: 2.093    ms | Total: 83785.888   ms | Sec: 83.786        | [ predict ]
 Count: 10000    | Avg: 8.391    ms | Total: 83908.269   ms | Sec: 83.908        | [ update ]
 Count: 100      | Avg: 839.612  ms | Total: 83961.195   ms | Sec: 83.961        | [ best ]
-Count: 1244937  | Avg: 0.003    ms | Total: 3736.402    ms | Sec: 3.736         | [ get_gene ]
 Count: 100      | Avg: 424.977  ms | Total: 42497.665   ms | Sec: 42.498        | [ reset ]
 Count: 1        | Avg: 126703.1 ms | Total: 126703.121  ms | Sec: 126.703       | [ main ]
 
@@ -31,10 +31,10 @@ Count: 1        | Avg: 126703.1 ms | Total: 126703.121  ms | Sec: 126.703       
 [GenomeHistory] Size Genes:  363
 Count: 2822215  | Avg: 0.003    ms | Total: 7376.552    ms | Sec: 7.377         | [ exists ]
 Count: 11619850 | Avg: 0.006    ms | Total: 64236.395   ms | Sec: 64.236        | [ get_node ]
+Count: 1184245  | Avg: 0.004    ms | Total: 4676.87     ms | Sec: 4.677         | [ get_gene ]
 Count: 40048    | Avg: 2.569    ms | Total: 102889.997  ms | Sec: 102.89        | [ predict ]
 Count: 10000    | Avg: 10.307   ms | Total: 103072.292  ms | Sec: 103.072       | [ update ]
 Count: 100      | Avg: 1031.396 ms | Total: 103139.635  ms | Sec: 103.14        | [ best ]
-Count: 1184245  | Avg: 0.004    ms | Total: 4676.87     ms | Sec: 4.677         | [ get_gene ]
 Count: 100      | Avg: 521.497  ms | Total: 52149.721   ms | Sec: 52.15         | [ reset ]
 Count: 1        | Avg: 156016.8 ms | Total: 156016.807  ms | Sec: 156.017       | [ main ]
 
@@ -43,11 +43,19 @@ Count: 1        | Avg: 156016.8 ms | Total: 156016.807  ms | Sec: 156.017       
 [GenomeHistory] Size Genes:  361
 Count: 2886682  | Avg: 0.002    ms | Total: 6078.319    ms | Sec: 6.078         | [ exists ]
 Count: 12413828 | Avg: 0.003    ms | Total: 35159.113   ms | Sec: 35.159        | [ get_node ]
+Count: 1254582  | Avg: 0.003    ms | Total: 3756.27     ms | Sec: 3.756         | [ get_gene ]
 Count: 40404    | Avg: 1.233    ms | Total: 49804.41    ms | Sec: 49.804        | [ predict ]
 Count: 10000    | Avg: 4.95     ms | Total: 49500.965   ms | Sec: 49.501        | [ update ]
 Count: 100      | Avg: 495.431  ms | Total: 49543.112   ms | Sec: 49.543        | [ best ]
-Count: 1254582  | Avg: 0.003    ms | Total: 3756.27     ms | Sec: 3.756         | [ get_gene ]
 Count: 100      | Avg: 411.603  ms | Total: 41160.254   ms | Sec: 41.16         | [ reset ]
 Count: 1        | Avg: 91291.7  ms | Total: 91291.746   ms | Sec: 91.292        | [ main ]
 #####
 
+Count: 2682043  | Avg: 0.002    ms | Total: 5105.071    ms | Sec: 5.105         | [ exists ]
+Count: 11498390 | Avg: 0.004    ms | Total: 43489.07    ms | Sec: 43.489        | [ get_node ]
+Count: 1162567  | Avg: 0.003    ms | Total: 2970.395    ms | Sec: 2.97          | [ get_gene ]
+Count: 40404    | Avg: 1.742    ms | Total: 70389.186   ms | Sec: 70.389        | [ predict ]
+Count: 10000    | Avg: 6.988    ms | Total: 69882.939   ms | Sec: 69.883        | [ update ]
+Count: 100      | Avg: 699.21   ms | Total: 69920.951   ms | Sec: 69.921        | [ best ]
+Count: 100      | Avg: 344.312  ms | Total: 34431.225   ms | Sec: 34.431        | [ reset ]
+Count: 1        | Avg: 105146.486       ms | Total: 105146.486  ms | Sec: 105   | [ main 

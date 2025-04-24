@@ -74,7 +74,7 @@ const xor: XorInputs[] = [
 
 const genome_history = new GenomeHistory(2, 1)
 const pop = new Population(genome_history, 100, XORsolver)
-Profiler.enable = false
+Profiler.enable = true
 
 const start = performance.now()
 
