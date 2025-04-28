@@ -1,5 +1,7 @@
 from __future__ import annotations
+
 from neat_ref import *
+
 import pygame
 
 
@@ -7,24 +9,26 @@ class Agent(Protocol):
     dead: bool
     fitness: float
     brain: Genome
-    graphics:Graphics
-
+    graphics: Graphics
 
     def __init__(self, gh: GenomeHistory): ...
     def mate(self, parent: Self) -> Self: ...
     def update(self, inputs: Sequence[Pipe], dt: float): ...
 
+
 @dataclass
 class Graphics:
     body: pygame.Rect
+    current_image = 0.0
+    animation_speed = 0.0
     color: str = "#ffffff"
+    assets: list[pygame.Surface] = field(default_factory=lambda: [])
+    anchor_point: pygame.Vector2 = field(default_factory=lambda: pygame.math.Vector2(0, 0))
 
 
 class Pipe(Protocol):
     top_rect: pygame.Rect
     bottom_rect: pygame.Rect
-    width: float
-    height: float
     pos_x: float
 
     def update(self, dt: float): ...

@@ -6,6 +6,7 @@ import random
 class Population:
     def __init__(self, gh: GenomeHistory, pop_size: int, agent: Type[Agent]) -> None:
         self.pop_size = pop_size
+        self.generation = 0
         self.population: list[Agent] = []
         self.gh = gh
 
@@ -16,6 +17,7 @@ class Population:
         self.best_global = self.population[0]
 
     def reset(self):
+        self.generation += 1
         parents = self.population
 
         parents.sort(key=lambda x: x.fitness, reverse=True)
@@ -51,31 +53,3 @@ class Population:
 
             if (fitness > self.best_global.fitness):
                 self.best_global = agent
-
-
-# class Population:
-#     population = 100
-    
-#     def update_population
-#         for agent in population
-#             update_agent(pipe)
-
-
-
-# class agent:
-#     pipe_calculate_next_move()
-
-#     render_agent
-
-
-# class pipe
-#     pos_pipe
-#     size_pipe
-
-#     render_pipe
-
-# class screen
-#     render_stuff
-
-
-# these are my classes, the agent is part of the population, and requires class pipe and screen, but that makes my code tightly coupled, how can i 
