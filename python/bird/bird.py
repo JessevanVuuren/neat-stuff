@@ -10,7 +10,7 @@ import pygame
 
 class Bird(Agent):
     def __init__(self, gh: GenomeHistory, assets: list[str] = []) -> None:
-        self.assets:list[str] = []
+        self.assets:list[str] = assets
         self.fly_cooldown = .15
         self.gh = gh
         self.setup_bird()
@@ -35,10 +35,11 @@ class Bird(Agent):
         for _ in range(10):
             self.brain.mutate()
 
+        self.set_sprites(self.assets)
 
     def reset(self):
         self.setup_bird()
-        self.set_sprites(self.assets)
+        
 
     def set_sprites(self, sprites: list[str]):
         self.assets = sprites

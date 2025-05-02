@@ -58,6 +58,7 @@ class Population:
                 self.best_global = agent
 
     def display_stats(self):
+        print()
         print("Generation:", self.generation)
         print("Best Local:", self.best_local.fitness)
         print("Best Global:", self.best_global.fitness)

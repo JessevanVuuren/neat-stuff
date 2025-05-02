@@ -40,14 +40,14 @@ def manual_inputs():
         player.move(ActionState.FLY, dt)
 
 
-genome_history = GenomeHistory(4, 1)
+genome_history = GenomeHistory(NEAT_INPUTS, NEAT_OUTPUT)
 pop = Population(genome_history, 100, Bird, bird_sprites)
 
 render = Render()
 render.set_background("./assets/background-day.png", True, True)
 
-player = Bird(genome_history)
-player.set_sprites(bird_sprites)
+player = Bird(genome_history, bird_sprites)
+
 
 while True:
     pipe = PipeObject("./assets/pipe-green.png")
@@ -55,7 +55,7 @@ while True:
     pipes = [pipe]
     dt = 0
 
-    while not player.dead:
+    while not pop.all_dead() and not player.dead:
         quit_actions()
 
         render.fill()
@@ -95,4 +95,3 @@ while True:
     if (GAME_PLAYER == GamePlayer.NEAT.value):
         pop.display_stats()
         pop.reset()
-

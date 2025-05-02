@@ -3,6 +3,7 @@ from dataclasses import dataclass, field  # type: ignore
 from enum import Enum, EnumMeta  # type: ignore
 import pygame
 
+
 class MetaEnum(EnumMeta):
     def __contains__(cls, item): # type: ignore
         try:
