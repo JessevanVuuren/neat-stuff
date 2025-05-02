@@ -4,14 +4,17 @@ from neat_ref import *
 import random
 
 class Population:
-    def __init__(self, gh: GenomeHistory, pop_size: int, agent: Type[Agent]) -> None:
+    def __init__(self, gh: GenomeHistory, pop_size: int, agent: Type[Agent], assets:list[str] = []) -> None:
+        self.agent = agent
         self.pop_size = pop_size
         self.generation = 0
         self.population: list[Agent] = []
+        self.test = []
         self.gh = gh
 
-        for _ in range(pop_size):
-            self.population.append(agent(gh))
+        for _ in range(self.pop_size):
+            entity = self.agent(self.gh, assets)
+            self.population.append(entity)
 
         self.best_local = self.population[0]
         self.best_global = self.population[0]
@@ -53,3 +56,8 @@ class Population:
 
             if (fitness > self.best_global.fitness):
                 self.best_global = agent
+
+    def display_stats(self):
+        print("Generation:", self.generation)
+        print("Best Local:", self.best_local.fitness)
+        print("Best Global:", self.best_global.fitness)

@@ -4,10 +4,16 @@ SCREEN_HEIGHT = 720
 FPS = 120
 GRAVITY = 35
 
+GAME_TYPE = "dynamic" # "static" = up down, "dynamic" = gravity
+# GAME_TYPE = "dynamic" # "static" = up down, "dynamic" = gravity
+GAME_PLAYER = "manual" # "manual" = human, "neat" = ai
+# GAME_PLAYER = "neat" # "manual" = human, "neat" = ai
+
 BIRD_FLY_FORCE = 8
 BIRD_SPEED = 600
 BIRD_SIZE = 50
 BIRD_ANIMATION_SPEED = 7
+ROTATION_SCALE = 0.3
 
 PIPE_SPEED = 200
 PIPE_WIDTH = 100

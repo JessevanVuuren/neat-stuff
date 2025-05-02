@@ -9,24 +9,39 @@ import pygame
 
 
 class Bird(Agent):
-    def __init__(self, gh: GenomeHistory) -> None:
-        self.velocity = 0.0
-        self.fitness = 0.0
-        self.pre_pos = 0.0
+    def __init__(self, gh: GenomeHistory, assets: list[str] = []) -> None:
+        self.assets:list[str] = []
+        self.fly_cooldown = .15
+        self.gh = gh
+        self.setup_bird()
+
+    def setup_bird(self):
+        self.current_fly = 0
+
+        self.rotation = 0
+        self.velocity = 0
+        self.fitness = 0
+        self.pre_pos = 0
 
         self.dead = False
         self.hit = False
-        self.gh = gh
 
-        self.body = pygame.Rect(SCREEN_WIDTH * .3 - BIRD_SIZE / 2, SCREEN_HEIGHT / 2 - BIRD_SIZE / 2, BIRD_SIZE, BIRD_SIZE)
+        self.body = pygame.Rect(SCREEN_WIDTH * .3 - BIRD_SIZE / 2,
+                                SCREEN_HEIGHT / 2 - BIRD_SIZE / 2, BIRD_SIZE, BIRD_SIZE)
         self.graphics = Graphics(self.body)
         self.graphics.animation_speed = BIRD_ANIMATION_SPEED
 
-        self.brain = Genome(gh)
+        self.brain = Genome(self.gh)
         for _ in range(10):
             self.brain.mutate()
 
+
+    def reset(self):
+        self.setup_bird()
+        self.set_sprites(self.assets)
+
     def set_sprites(self, sprites: list[str]):
+        self.assets = sprites
         for sprite in sprites:
             img = pygame.image.load(sprite)
             scale_factor = BIRD_SIZE / img.get_width()
@@ -34,7 +49,7 @@ class Bird(Agent):
             self.body.height = scaled_img.get_height()
             self.graphics.assets.append(scaled_img)
 
-    def update(self, inputs: Sequence[Pipe], dt: float, human_player: bool = False):
+    def update(self, inputs: Sequence[Pipe], dt: float):
         pipe = self.closest_pipe(inputs)
 
         if (pipe.top_rect.colliderect(self.body) or pipe.bottom_rect.colliderect(self.body) or self.body.bottomleft[1] >= SCREEN_HEIGHT or self.body.topleft[1] < 0):
@@ -45,25 +60,43 @@ class Bird(Agent):
 
         self.fitness += 1
 
-        self.update_movement(pipe, dt, human_player)
+        if self.current_fly > 0:
+            self.current_fly -= dt
+
+        self.update_movement(pipe, dt)
         self.update_animation(dt)
 
-    def update_movement(self, pipe: Pipe, dt: float, human_player: bool):
-        if (not human_player):
+    def update_movement(self, pipe: Pipe, dt: float):
+        if (GAME_PLAYER == GamePlayer.NEAT.value):
             norm_inputs = self.get_inputs(pipe)
             action = self.think(norm_inputs)
             self.move(action, dt)
-        else:
+
+        if (GAME_TYPE == GameType.DYNAMIC.value):
             self.velocity += GRAVITY * dt
             self.body.centery += int(self.velocity)
 
     def update_animation(self, dt: float):
+
         if (self.pre_pos > self.body.centery):
             self.graphics.current_image = 0
+            self.rotation = 45
+
         elif (self.pre_pos == self.body.centery):
             self.graphics.current_image = 1
+            if (GAME_TYPE == GameType.STATIC.value):
+                self.rotation = 0
+
         else:
+            if (GAME_TYPE == GameType.STATIC.value):
+                self.rotation = -45
+            else:
+                self.rotation -= self.velocity * ROTATION_SCALE
             self.graphics.current_image = 2
+
+        surface = self.graphics.assets[self.graphics.current_image]
+        rotated_image = pygame.transform.rotate(surface, self.rotation)
+        self.graphics.current_surface = rotated_image
 
         self.pre_pos = self.body.centery
         self.graphics.anchor_point = tuple_2_vec2(self.body.topleft)
@@ -71,7 +104,16 @@ class Bird(Agent):
     def think(self, inputs: list[float]):
         out = self.brain.get_outputs(inputs)
         index = out.index(max(out))
-        return ActionState(index)
+
+        if (GAME_TYPE == GameType.STATIC.value):
+            return ActionState(index)
+        if (GAME_TYPE == GameType.DYNAMIC.value):
+            if (out[0] > .5):
+                return ActionState.FLY
+            else:
+                return ActionState.STAY
+
+        raise Exception("not can be")
 
     def closest_pipe(self, pipes: Sequence[Pipe]) -> Pipe:
         for pipe in pipes:
@@ -80,20 +122,24 @@ class Bird(Agent):
 
         return pipes[0]
 
-    def fly(self):
-        self.velocity = -BIRD_FLY_FORCE
-
     def mate(self, parent: Bird):
-        child = Bird(self.gh)
+        child = Bird(self.gh, self.assets)
         child.brain = self.brain.crossover(parent.brain)
         return child
 
     def get_inputs(self, pipe: Pipe):
         inputs: list[float] = []
-        inputs.append((SCREEN_HEIGHT - self.body.centery) / SCREEN_HEIGHT)                        # distance ground
-        inputs.append((pipe.pos_x + PIPE_WIDTH - self.body.topleft[0]) / SCREEN_WIDTH)            # distance first pipe
-        inputs.append((self.body.bottomleft[1] - pipe.top_rect.bottomleft[1]) / SCREEN_HEIGHT)    # distance to top pipe
-        inputs.append((pipe.bottom_rect.topleft[1] - self.body.topleft[1]) / SCREEN_HEIGHT)       # distance to bottom pipe
+        inputs.append((SCREEN_HEIGHT - self.body.centery) /
+                      SCREEN_HEIGHT)                        # distance ground
+        # distance first pipe
+        inputs.append((pipe.pos_x + PIPE_WIDTH -
+                      self.body.topleft[0]) / SCREEN_WIDTH)
+        # distance to top pipe
+        inputs.append(
+            (self.body.bottomleft[1] - pipe.top_rect.bottomleft[1]) / SCREEN_HEIGHT)
+        # distance to bottom pipe
+        inputs.append(
+            (pipe.bottom_rect.topleft[1] - self.body.topleft[1]) / SCREEN_HEIGHT)
         return inputs
 
     def move(self, state: ActionState, dt: float):
@@ -107,5 +153,6 @@ class Bird(Agent):
         if state == ActionState.STAY:
             pass
 
-    def __call__(self, gh: GenomeHistory) -> Self:
-        raise NotImplementedError
+        if state == ActionState.FLY and self.current_fly <= 0:
+            self.velocity = -BIRD_FLY_FORCE
+            self.current_fly = self.fly_cooldown

@@ -36,6 +36,10 @@ class Render:
         else:
             pygame.draw.rect(self.screen, graph.color, graph.body)
 
+    def graphics_surface(self, graph: Graphics):
+        if (graph.current_surface):
+            self.screen.blit(graph.current_surface, graph.anchor_point)
+
     def render_animation(self, graph: Graphics):
         image = graph.assets[math.floor(graph.current_image)]
         self.screen.blit(image, graph.anchor_point)
