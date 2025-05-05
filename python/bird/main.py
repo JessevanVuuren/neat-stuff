@@ -3,6 +3,7 @@ from __future__ import annotations
 from population_bird import Population
 from renderer import Render
 from pipe import PipeObject
+from controller import *
 from game_types import *
 from neat_ref import *
 from globals import *
@@ -19,8 +20,9 @@ clock = pygame.time.Clock()
 running = True
 dt = 0
 
-bird_sprites = ["./assets/redbird-downflap.png",
-                "./assets/redbird-midflap.png", "./assets/redbird-upflap.png"]
+bird_sprites = [["./assets/redbird-downflap.png", "./assets/redbird-midflap.png", "./assets/redbird-upflap.png"],
+                ["./assets/yellowbird-downflap.png", "./assets/yellowbird-midflap.png", "./assets/yellowbird-upflap.png"],
+                ["./assets/bluebird-downflap.png", "./assets/bluebird-midflap.png", "./assets/bluebird-upflap.png"],]
 
 
 def quit_actions():
@@ -41,12 +43,22 @@ def manual_inputs():
 
 
 genome_history = GenomeHistory(NEAT_INPUTS, NEAT_OUTPUT)
-pop = Population(genome_history, 100, Bird, bird_sprites)
+pop = Population(genome_history, NEAT_POP_SIZE, Bird, bird_sprites)
 
 render = Render()
 render.set_background("./assets/background-day.png", True, True)
 
 player = Bird(genome_history, bird_sprites)
+
+
+controller: GameController
+match GAME_PLAYER:
+    case GamePlayer.NEAT.value:
+        controller = NeatController(pop, render)
+    case GamePlayer.MANUAL.value:
+        controller = ManualController(player, render)
+    case _:
+        raise ValueError("Unsupported GAME_PLAYER mode")
 
 
 while True:
@@ -60,18 +72,8 @@ while True:
 
         render.fill()
 
-        if (GAME_PLAYER == GamePlayer.MANUAL.value):
-            player.update(pipes, dt)
-            render.graphics_surface(player.graphics)
-        if (GAME_PLAYER == GamePlayer.NEAT.value):
-            pop.update(pipes, dt)
-
-            for bird in pop.population:
-                if (not bird.dead):
-                    render.graphics_surface(bird.graphics)
-
-        if (GAME_PLAYER == GamePlayer.MANUAL.value):
-            manual_inputs()
+        controller.update(pipes, dt)
+        controller.handle_inputs(dt)
 
         if (last_pipe.pos_x < SCREEN_WIDTH - PIPE_GAP_BETWEEN - PIPE_WIDTH):
             pipe = PipeObject("./assets/pipe-green.png")
@@ -90,8 +92,4 @@ while True:
         render.display()
         clock.tick(FPS)
 
-    if (GAME_PLAYER == GamePlayer.MANUAL.value):
-        player.reset()
-    if (GAME_PLAYER == GamePlayer.NEAT.value):
-        pop.display_stats()
-        pop.reset()
+    controller.reset()

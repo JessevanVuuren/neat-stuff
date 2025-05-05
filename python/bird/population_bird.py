@@ -4,7 +4,7 @@ from neat_ref import *
 import random
 
 class Population:
-    def __init__(self, gh: GenomeHistory, pop_size: int, agent: Type[Agent], assets:list[str] = []) -> None:
+    def __init__(self, gh: GenomeHistory, pop_size: int, agent: Type[Agent], assets:list[list[str]] = []) -> None:
         self.agent = agent
         self.pop_size = pop_size
         self.generation = 0

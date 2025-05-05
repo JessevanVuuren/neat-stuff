@@ -11,9 +11,10 @@ class Agent(Protocol):
     brain: Genome
     graphics: Graphics
 
-    def __init__(self, gh: GenomeHistory, assets: list[str] = []): ...
+    def __init__(self, gh: GenomeHistory, assets: list[list[str]] = []): ...
     def mate(self, parent: Self) -> Self: ...
     def update(self, inputs: Sequence[Pipe], dt: float): ...
+    def move(self, input:ActionState, dt:float): ...
     def reset(self): ...
 
 
@@ -25,8 +26,7 @@ class Graphics:
     color: str = "#ffffff"
     current_surface: pygame.Surface | None = None
     assets: list[pygame.Surface] = field(default_factory=lambda: [])
-    anchor_point: pygame.Vector2 = field(
-        default_factory=lambda: pygame.math.Vector2(0, 0))
+    anchor_point: pygame.Vector2 = field(default_factory=lambda: pygame.math.Vector2(0, 0))
 
 
 class Pipe(Protocol):

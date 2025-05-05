@@ -1,16 +1,19 @@
 from __future__ import annotations
 
+
 from population_bird import *
+from controller import *
 from game_types import *
 from neat_ref import *
 from globals import *
 
+import random
 import pygame
 
 
 class Bird(Agent):
-    def __init__(self, gh: GenomeHistory, assets: list[str] = []) -> None:
-        self.assets:list[str] = assets
+    def __init__(self, gh: GenomeHistory, assets: list[list[str]] = []) -> None:
+        self.assets: list[list[str]] = assets
         self.fly_cooldown = .15
         self.gh = gh
         self.setup_bird()
@@ -26,8 +29,7 @@ class Bird(Agent):
         self.dead = False
         self.hit = False
 
-        self.body = pygame.Rect(SCREEN_WIDTH * .3 - BIRD_SIZE / 2,
-                                SCREEN_HEIGHT / 2 - BIRD_SIZE / 2, BIRD_SIZE, BIRD_SIZE)
+        self.body = pygame.Rect(SCREEN_WIDTH * .3 - BIRD_SIZE / 2, SCREEN_HEIGHT / 2 - BIRD_SIZE / 2, BIRD_SIZE, BIRD_SIZE)
         self.graphics = Graphics(self.body)
         self.graphics.animation_speed = BIRD_ANIMATION_SPEED
 
@@ -39,11 +41,12 @@ class Bird(Agent):
 
     def reset(self):
         self.setup_bird()
-        
 
-    def set_sprites(self, sprites: list[str]):
+    def set_sprites(self, sprites: list[list[str]]):
         self.assets = sprites
-        for sprite in sprites:
+
+        color_sprites = random.choice(self.assets)
+        for sprite in color_sprites:
             img = pygame.image.load(sprite)
             scale_factor = BIRD_SIZE / img.get_width()
             scaled_img = pygame.transform.scale_by(img, scale_factor)
@@ -130,30 +133,23 @@ class Bird(Agent):
 
     def get_inputs(self, pipe: Pipe):
         inputs: list[float] = []
-        inputs.append((SCREEN_HEIGHT - self.body.centery) /
-                      SCREEN_HEIGHT)                        # distance ground
-        # distance first pipe
-        inputs.append((pipe.pos_x + PIPE_WIDTH -
-                      self.body.topleft[0]) / SCREEN_WIDTH)
-        # distance to top pipe
-        inputs.append(
-            (self.body.bottomleft[1] - pipe.top_rect.bottomleft[1]) / SCREEN_HEIGHT)
-        # distance to bottom pipe
-        inputs.append(
-            (pipe.bottom_rect.topleft[1] - self.body.topleft[1]) / SCREEN_HEIGHT)
+        inputs.append((SCREEN_HEIGHT - self.body.centery) / SCREEN_HEIGHT)                      # distance ground
+        inputs.append((pipe.pos_x + PIPE_WIDTH - self.body.topleft[0]) / SCREEN_WIDTH)          # distance first pipe
+        inputs.append((self.body.bottomleft[1] - pipe.top_rect.bottomleft[1]) / SCREEN_HEIGHT)  # distance to top pipe
+        inputs.append((pipe.bottom_rect.topleft[1] - self.body.topleft[1]) / SCREEN_HEIGHT)     # distance to bottom pipe
         return inputs
 
-    def move(self, state: ActionState, dt: float):
+    def move(self, input: ActionState, dt: float):
         if self.dead:
             return
 
-        if state == ActionState.UP:
+        if input == ActionState.UP:
             self.body.centery -= int(BIRD_SPEED * dt)
-        if state == ActionState.DOWN:
+        if input == ActionState.DOWN:
             self.body.centery += int(BIRD_SPEED * dt)
-        if state == ActionState.STAY:
+        if input == ActionState.STAY:
             pass
 
-        if state == ActionState.FLY and self.current_fly <= 0:
+        if input == ActionState.FLY and self.current_fly <= 0:
             self.velocity = -BIRD_FLY_FORCE
             self.current_fly = self.fly_cooldown

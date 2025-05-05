@@ -11,6 +11,7 @@ GAME_PLAYER = "neat" # "manual" = human, "neat" = ai
 
 NEAT_INPUTS = 4
 NEAT_OUTPUT = 1
+NEAT_POP_SIZE = 100
 
 BIRD_FLY_FORCE = 8
 BIRD_SPEED = 600
