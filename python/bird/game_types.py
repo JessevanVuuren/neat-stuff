@@ -5,19 +5,6 @@ from neat_ref import *
 import pygame
 
 
-class Agent(Protocol):
-    dead: bool
-    fitness: float
-    brain: Genome
-    graphics: Graphics
-
-    def __init__(self, gh: GenomeHistory, assets: list[list[str]] = []): ...
-    def mate(self, parent: Self) -> Self: ...
-    def update(self, inputs: Sequence[Pipe], dt: float): ...
-    def move(self, input:ActionState, dt:float): ...
-    def reset(self): ...
-
-
 @dataclass
 class Graphics:
     body: pygame.Rect

@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-
-from population_bird import *
-from controller import *
+from controller import PhysicsController, GameController
 from game_types import *
 from neat_ref import *
 from globals import *
@@ -11,20 +9,26 @@ import random
 import pygame
 
 
-class Bird(Agent):
-    def __init__(self, gh: GenomeHistory, assets: list[list[str]] = []) -> None:
+class Bird:
+    def __init__(self, gh: GenomeHistory, assets: list[list[str]]) -> None:
+        self.physicsController: PhysicsController
+        self.gameController: GameController
+
         self.assets: list[list[str]] = assets
         self.fly_cooldown = .15
         self.gh = gh
         self.setup_bird()
 
-    def setup_bird(self):
-        self.current_fly = 0
+    def set_controllers(self, game: GameController, physics: PhysicsController):
+        self.physicsController = physics
+        self.gameController = game
 
-        self.rotation = 0
-        self.velocity = 0
-        self.fitness = 0
-        self.pre_pos = 0
+    def setup_bird(self):
+        self.current_fly = 0.0
+        self.rotation = 0.0
+        self.velocity = 0.0
+        self.fitness = 0.0
+        self.pre_pos = 0.0
 
         self.dead = False
         self.hit = False
@@ -81,24 +85,9 @@ class Bird(Agent):
             self.body.centery += int(self.velocity)
 
     def update_animation(self, dt: float):
+        image = self.physicsController.animation(self)
+        surface = self.graphics.assets[image]
 
-        if (self.pre_pos > self.body.centery):
-            self.graphics.current_image = 0
-            self.rotation = 45
-
-        elif (self.pre_pos == self.body.centery):
-            self.graphics.current_image = 1
-            if (GAME_TYPE == GameType.STATIC.value):
-                self.rotation = 0
-
-        else:
-            if (GAME_TYPE == GameType.STATIC.value):
-                self.rotation = -45
-            else:
-                self.rotation -= self.velocity * ROTATION_SCALE
-            self.graphics.current_image = 2
-
-        surface = self.graphics.assets[self.graphics.current_image]
         rotated_image = pygame.transform.rotate(surface, self.rotation)
         self.graphics.current_surface = rotated_image
 
@@ -107,17 +96,7 @@ class Bird(Agent):
 
     def think(self, inputs: list[float]):
         out = self.brain.get_outputs(inputs)
-        index = out.index(max(out))
-
-        if (GAME_TYPE == GameType.STATIC.value):
-            return ActionState(index)
-        if (GAME_TYPE == GameType.DYNAMIC.value):
-            if (out[0] > .5):
-                return ActionState.FLY
-            else:
-                return ActionState.STAY
-
-        raise Exception("not can be")
+        return self.physicsController.think(out)
 
     def closest_pipe(self, pipes: Sequence[Pipe]) -> Pipe:
         for pipe in pipes:
@@ -128,6 +107,7 @@ class Bird(Agent):
 
     def mate(self, parent: Bird):
         child = Bird(self.gh, self.assets)
+        child.set_controllers(self.gameController, self.physicsController)
         child.brain = self.brain.crossover(parent.brain)
         return child
 

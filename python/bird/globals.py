@@ -4,13 +4,13 @@ SCREEN_HEIGHT = 720
 FPS = 120
 GRAVITY = 35
 
-GAME_TYPE = "dynamic" # "static" = up down, "dynamic" = gravity
-# GAME_TYPE = "static" # "static" = up down, "dynamic" = gravity
+# GAME_TYPE = "dynamic" # "static" = up down, "dynamic" = gravity
+GAME_TYPE = "static" # "static" = up down, "dynamic" = gravity
 # GAME_PLAYER = "manual" # "manual" = human, "neat" = ai
 GAME_PLAYER = "neat" # "manual" = human, "neat" = ai
 
 NEAT_INPUTS = 4
-NEAT_OUTPUT = 1
+NEAT_OUTPUT = 3
 NEAT_POP_SIZE = 100
 
 BIRD_FLY_FORCE = 8

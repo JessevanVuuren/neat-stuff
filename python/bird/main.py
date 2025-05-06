@@ -43,23 +43,34 @@ def manual_inputs():
 
 
 genome_history = GenomeHistory(NEAT_INPUTS, NEAT_OUTPUT)
-pop = Population(genome_history, NEAT_POP_SIZE, Bird, bird_sprites)
+pop = Population(genome_history, NEAT_POP_SIZE, lambda: Bird(genome_history, bird_sprites))
 
 render = Render()
 render.set_background("./assets/background-day.png", True, True)
 
 player = Bird(genome_history, bird_sprites)
 
+physicsController: PhysicsController
+match GAME_TYPE:
+    case GameType.STATIC.value:
+        physicsController = StaticController()
+    case GameType.DYNAMIC.value:
+        physicsController = DynamicController()
+    case _:
+        raise ValueError("Unsupported GAME_TYPE mode")
 
-controller: GameController
+gameController: GameController
 match GAME_PLAYER:
     case GamePlayer.NEAT.value:
-        controller = NeatController(pop, render)
+        gameController = NeatController(pop, render)
     case GamePlayer.MANUAL.value:
-        controller = ManualController(player, render)
+        gameController = ManualController(player, render)
     case _:
         raise ValueError("Unsupported GAME_PLAYER mode")
 
+player.set_controllers(gameController, physicsController)
+pop.set_controllers(gameController, physicsController)
+pop.create_population()
 
 while True:
     pipe = PipeObject("./assets/pipe-green.png")
@@ -72,8 +83,8 @@ while True:
 
         render.fill()
 
-        controller.update(pipes, dt)
-        controller.handle_inputs(dt)
+        gameController.update(pipes, dt)
+        gameController.handle_inputs(dt)
 
         if (last_pipe.pos_x < SCREEN_WIDTH - PIPE_GAP_BETWEEN - PIPE_WIDTH):
             pipe = PipeObject("./assets/pipe-green.png")
@@ -92,4 +103,4 @@ while True:
         render.display()
         clock.tick(FPS)
 
-    controller.reset()
+    gameController.reset()

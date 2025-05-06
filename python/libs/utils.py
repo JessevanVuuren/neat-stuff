@@ -1,4 +1,4 @@
-from typing import Protocol, Self, List, Type, Sequence, TypeVar, Optional, Tuple  # type: ignore
+from typing import Protocol, Self, List, Type, Sequence, TypeVar, Optional, Tuple, Callable  # type: ignore
 from dataclasses import dataclass, field  # type: ignore
 from abc import ABC, abstractmethod # type: ignore
 from enum import Enum, EnumMeta  # type: ignore

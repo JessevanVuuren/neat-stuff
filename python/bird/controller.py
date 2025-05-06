@@ -1,7 +1,10 @@
-from population_bird import Population
+from __future__ import annotations
+
+from population_bird import *
 from renderer import Render
 from game_types import *
 from neat_ref import *
+from globals import *
 
 
 class GameController:
@@ -16,7 +19,7 @@ class GameController:
 
 
 class ManualController(GameController):
-    def __init__(self, bird: Agent, render: Render) -> None:
+    def __init__(self, bird: Bird, render: Render) -> None:
         self.bird = bird
         self.render = render
 
@@ -56,3 +59,55 @@ class NeatController(GameController):
     def reset(self):
         self.population.display_stats()
         self.population.reset()
+
+
+class PhysicsController:
+    @abstractmethod
+    def think(self, out: list[float]) -> ActionState: ...
+
+    @abstractmethod
+    def animation(self, bird: Bird) -> int: ...
+
+    @abstractmethod
+    def movement(self, bird: Bird) -> int: ...
+
+
+class StaticController(PhysicsController):
+    def think(self, out: list[float]):
+        index = out.index(max(out))
+        return ActionState(index)
+
+    def animation(self, bird: Bird):
+        dy = bird.pre_pos - bird.body.centery
+
+        match dy:
+            case d if d > 0:
+                bird.rotation = 45
+                return 0
+            case 0:
+                bird.rotation = 0
+                return 1
+            case _:
+                bird.rotation = -45
+                return 2
+
+
+class DynamicController(PhysicsController):
+    def think(self, out: list[float]) -> ActionState:
+        if (out[0] > .5):
+            return ActionState.FLY
+        else:
+            return ActionState.STAY
+
+    def animation(self, bird: Bird):
+        dy = bird.pre_pos - bird.body.centery
+
+        match dy:
+            case d if d > 0:
+                bird.rotation = 45
+                return 0
+            case 0:
+                return 1
+            case _:
+                bird.rotation -= bird.velocity * ROTATION_SCALE
+                return 2

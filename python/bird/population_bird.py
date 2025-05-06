@@ -1,19 +1,32 @@
 from __future__ import annotations
+
+from controller import PhysicsController, GameController
 from game_types import *
 from neat_ref import *
+from bird import Bird
 import random
 
+
 class Population:
-    def __init__(self, gh: GenomeHistory, pop_size: int, agent: Type[Agent], assets:list[list[str]] = []) -> None:
+    def __init__(self, gh: GenomeHistory, pop_size: int, agent: Callable[[], Bird]) -> None:
+        self.physicsController: PhysicsController
+        self.gameController: GameController
+
         self.agent = agent
         self.pop_size = pop_size
         self.generation = 0
-        self.population: list[Agent] = []
+        self.population: list[Bird] = []
         self.test = []
         self.gh = gh
 
+    def set_controllers(self, game: GameController, physics: PhysicsController):
+        self.physicsController = physics
+        self.gameController = game
+
+    def create_population(self):
         for _ in range(self.pop_size):
-            entity = self.agent(self.gh, assets)
+            entity = self.agent()
+            entity.set_controllers(self.gameController, self.physicsController)
             self.population.append(entity)
 
         self.best_local = self.population[0]
@@ -51,7 +64,6 @@ class Population:
             fitness = agent.fitness
 
             if (fitness > self.best_local.fitness):
-
                 self.best_fitness = agent
 
             if (fitness > self.best_global.fitness):
