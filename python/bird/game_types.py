@@ -16,6 +16,7 @@ class Graphics:
     anchor_point: pygame.Vector2 = field(default_factory=lambda: pygame.math.Vector2(0, 0))
 
 
+
 class Pipe(Protocol):
     top_rect: pygame.Rect
     bottom_rect: pygame.Rect
@@ -40,6 +41,3 @@ class ActionState(Enum):
     STAY = 2
     FLY = 3
 
-class FlapState(Enum):
-    STAY = 0
-    FLY = 1

@@ -298,3 +298,9 @@ class Genome:
         delta = E + D + W
 
         return delta
+
+    def stats_genome(self):
+        print()
+        print("nodes:", len(self.nodes))
+        print("genes:", len(self.genes))
+        print()

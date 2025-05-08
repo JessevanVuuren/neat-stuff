@@ -72,13 +72,23 @@ player.set_controllers(gameController, physicsController)
 pop.set_controllers(gameController, physicsController)
 pop.create_population()
 
+
 while True:
     pipe = PipeObject("./assets/pipe-green.png")
     last_pipe = pipe
     pipes = [pipe]
     dt = 0
+    force_reset = False
+    reset = 5000
 
-    while not pop.all_dead() and not player.dead:
+    while not pop.all_dead() and not player.dead and not force_reset and reset >= 0:
+        reset -= 1
+
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    force_reset = True
+
         quit_actions()
 
         render.fill()
@@ -103,4 +113,6 @@ while True:
         render.display()
         clock.tick(FPS)
 
+    print(pop.best_global.fitness)
+    pop.best_global.brain.stats_genome()
     gameController.reset()

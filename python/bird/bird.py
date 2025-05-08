@@ -14,6 +14,8 @@ class Bird:
         self.physicsController: PhysicsController
         self.gameController: GameController
 
+        self.pre_action_state = ActionState.STAY
+
         self.assets: list[list[str]] = assets
         self.fly_cooldown = .15
         self.gh = gh
@@ -114,22 +116,21 @@ class Bird:
     def get_inputs(self, pipe: Pipe):
         inputs: list[float] = []
         inputs.append((SCREEN_HEIGHT - self.body.centery) / SCREEN_HEIGHT)                      # distance ground
-        inputs.append((pipe.pos_x + PIPE_WIDTH - self.body.topleft[0]) / SCREEN_WIDTH)          # distance first pipe
-        inputs.append((self.body.bottomleft[1] - pipe.top_rect.bottomleft[1]) / SCREEN_HEIGHT)  # distance to top pipe
-        inputs.append((pipe.bottom_rect.topleft[1] - self.body.topleft[1]) / SCREEN_HEIGHT)     # distance to bottom pipe
+        inputs.append((pipe.pos_x + PIPE_WIDTH - self.body.centerx) / SCREEN_WIDTH)             # distance first pipe
+        inputs.append((self.body.topleft[1] - pipe.top_rect.bottomleft[1]) / SCREEN_HEIGHT)     # distance to top pipe
+        inputs.append((pipe.bottom_rect.topleft[1] - self.body.bottomleft[1]) / SCREEN_HEIGHT)  # distance to bottom pipe
         return inputs
 
     def move(self, input: ActionState, dt: float):
-        if self.dead:
-            return
 
+        if (self.pre_action_state != input):
+            self.pre_action_state = input
+            self.fitness -= 1
+        
         if input == ActionState.UP:
             self.body.centery -= int(BIRD_SPEED * dt)
         if input == ActionState.DOWN:
             self.body.centery += int(BIRD_SPEED * dt)
-        if input == ActionState.STAY:
-            pass
-
         if input == ActionState.FLY and self.current_fly <= 0:
             self.velocity = -BIRD_FLY_FORCE
             self.current_fly = self.fly_cooldown

@@ -32,10 +32,13 @@ class ManualController(GameController):
 
         if keys[pygame.K_w]:
             self.bird.move(ActionState.UP, dt)
-        if keys[pygame.K_s]:
+        elif keys[pygame.K_s]:
             self.bird.move(ActionState.DOWN, dt)
-        if keys[pygame.K_SPACE]:
+        elif keys[pygame.K_SPACE]:
             self.bird.move(ActionState.FLY, dt)
+        else:
+            self.bird.move(ActionState.STAY, dt)
+
 
     def reset(self):
         self.bird.reset()
