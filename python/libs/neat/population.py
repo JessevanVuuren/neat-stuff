@@ -1,74 +1,63 @@
 from __future__ import annotations
+from collections.abc import Callable
 
-from controller import PhysicsController, GameController
-from game_types import *
-from neat_ref import *
-from bird import Bird
+from .genome import Genome
+from .genome_history import GenomeHistory
+
+
 import random
 
 
 class Population:
-    def __init__(self, gh: GenomeHistory, pop_size: int, agent: Callable[[], Bird]) -> None:
-        self.physicsController: PhysicsController
-        self.gameController: GameController
+    def __init__(self, gh: GenomeHistory, pop_size: int) -> None:
 
-        self.agent = agent
         self.pop_size = pop_size
         self.generation = 0
-        self.population: list[Bird] = []
+        self.population: list[Genome] = []
         self.gh = gh
 
-    def set_controllers(self, game: GameController, physics: PhysicsController):
-        self.physicsController = physics
-        self.gameController = game
-
-    def create_population(self):
         for _ in range(self.pop_size):
-            entity = self.agent()
-            entity.set_controllers(self.gameController, self.physicsController)
-            self.population.append(entity)
+            genome = Genome(self.gh)
+            [genome.mutate() for _ in range(10)]
+            self.population.append(genome)
 
         self.best_local = self.population[0]
         self.best_global = self.population[0]
 
     def reset(self):
         self.generation += 1
+
         parents = self.population
+        self.population = []
 
         parents.sort(key=lambda x: x.fitness, reverse=True)
-        self.population = []
 
         for _ in range(self.pop_size):
             parent1 = parents[random.randint(0, len(parents) // 10)]
             parent2 = parents[random.randint(0, len(parents) // 10)]
-            agent = parent1.mate(parent2)
-            agent.brain.mutate()
-            self.population.append(agent)
 
-        self.best_local = self.population[0]
+            child = parent1.crossover(parent2)
+            child.mutate()
 
-    def all_dead(self):
+            self.population.append(child)
 
-        for agent in self.population:
-            if not agent.dead:
-                return False
+    def run(self, fitness_function: Callable[[list[Genome]], None], n: int = 0):
 
-        return True
+        if (n == 0):
+            raise RuntimeError("n cannot, (yet!) be zero")
 
-    def update(self, inputs: Sequence[Pipe], dt: float):
-        for agent in self.population:
+        for _ in range(n):
+            fitness_function(self.population)
 
-            agent.update(inputs, dt)
-            fitness = agent.fitness
+            self.best_local = self.population[0]
+            for genome in self.population:
+                if (genome.fitness > self.best_local.fitness):
+                    self.best_local = genome
 
-            if (fitness > self.best_local.fitness):
-                self.best_fitness = agent
+            if (self.best_local.fitness > self.best_global.fitness):
+                self.best_global = self.best_local
 
-            if (fitness > self.best_global.fitness):
-                self.best_global = agent
-
-    def display_stats(self):
-        print()
-        print("Generation:", self.generation)
-        print("Best Local:", self.best_local.fitness)
-        print("Best Global:", self.best_global.fitness)
+            print("Local Fitness: ", self.best_local.fitness)
+            print("Global Fitness: ", self.best_global.fitness)
+            print()
+            self.reset()

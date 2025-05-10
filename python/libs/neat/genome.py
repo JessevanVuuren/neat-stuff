@@ -213,8 +213,6 @@ class Genome:
             child.total_nodes = self.total_nodes
             for node in self.nodes:
                 child.nodes.append(node.clone())
-            # for i in range(self.total_nodes):
-            #     child.nodes.append(self.nodes[i].clone())
         else:
             child.total_nodes = partner.total_nodes
             for node in partner.nodes:
