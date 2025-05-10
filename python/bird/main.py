@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-from population_bird import Population
 from renderer import Render
 from pipe import PipeObject
-from controller import *
 from game_types import *
 from neat_ref import *
 from globals import *
@@ -30,71 +28,42 @@ def quit_actions():
         if event.type == pygame.QUIT:
             pygame.quit()
 
-
-def manual_inputs():
-    keys = pygame.key.get_pressed()
-
-    if keys[pygame.K_w]:
-        player.move(ActionState.UP, dt)
-    if keys[pygame.K_s]:
-        player.move(ActionState.DOWN, dt)
-    if keys[pygame.K_SPACE]:
-        player.move(ActionState.FLY, dt)
-
-
 genome_history = GenomeHistory(NEAT_INPUTS, NEAT_OUTPUT)
-pop = Population(genome_history, NEAT_POP_SIZE, lambda: Bird(genome_history, bird_sprites))
+pop = Population(genome_history, NEAT_POP_SIZE)
 
 render = Render()
 render.set_background("./assets/background-day.png", True, True)
 
-player = Bird(genome_history, bird_sprites)
+def eval(genomes: list[Genome]):
+    birds: list[FlyBird] = []
 
-physicsController: PhysicsController
-match GAME_TYPE:
-    case GameType.STATIC.value:
-        physicsController = StaticController()
-    case GameType.DYNAMIC.value:
-        physicsController = DynamicController()
-    case _:
-        raise ValueError("Unsupported GAME_TYPE mode")
-
-gameController: GameController
-match GAME_PLAYER:
-    case GamePlayer.NEAT.value:
-        gameController = NeatController(pop, render)
-    case GamePlayer.MANUAL.value:
-        gameController = ManualController(player, render)
-    case _:
-        raise ValueError("Unsupported GAME_PLAYER mode")
-
-player.set_controllers(gameController, physicsController)
-pop.set_controllers(gameController, physicsController)
-pop.create_population()
-
-
-while True:
     pipe = PipeObject("./assets/pipe-green.png")
     last_pipe = pipe
     pipes = [pipe]
     dt = 0
-    force_reset = False
-    reset = 5000
 
-    while not pop.all_dead() and not player.dead and not force_reset and reset >= 0:
-        reset -= 1
+    for genome in genomes:
+        bird = Bird(bird_sprites)
+        birds.append(FlyBird(bird, genome))
 
-        for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    force_reset = True
+    while len(birds) > 0 and birds[0].brain.fitness < 5000:
 
         quit_actions()
 
         render.fill()
 
-        gameController.update(pipes, dt)
-        gameController.handle_inputs(dt)
+        for i, bird in enumerate(birds):
+            bird.body.update(pipes, dt, GAME_TYPE == GameType.DYNAMIC.value)
+            bird.brain.fitness += 1
+            inputs = bird.body.get_inputs(bird.body.closest_pipe(pipes))
+            out = bird.brain.get_outputs(inputs)
+            action = ActionState.FLY if out[0] > .5 else ActionState.STAY
+
+            bird.body.move(action, dt)
+
+            render.graphics_surface(bird.body.graphics)
+            if bird.body.dead:
+                birds.pop(i)
 
         if (last_pipe.pos_x < SCREEN_WIDTH - PIPE_GAP_BETWEEN - PIPE_WIDTH):
             pipe = PipeObject("./assets/pipe-green.png")
@@ -113,6 +82,5 @@ while True:
         render.display()
         clock.tick(FPS)
 
-    print(pop.best_global.fitness)
-    pop.best_global.brain.stats_genome()
-    gameController.reset()
+
+pop.run(eval)

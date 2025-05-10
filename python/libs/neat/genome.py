@@ -21,7 +21,7 @@ class Genome:
         self.nodes: list[Node] = []
         self.genes: list[Gene] = []
 
-        self.fitness = random.uniform(0, 200)
+        self.fitness = 0.0
         self.adjusted_fitness = 0.0
 
         for _ in range(self.inputs):

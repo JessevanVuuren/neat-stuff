@@ -43,10 +43,9 @@ class Population:
 
     def run(self, fitness_function: Callable[[list[Genome]], None], n: int = 0):
 
-        if (n == 0):
-            raise RuntimeError("n cannot, (yet!) be zero")
 
-        for _ in range(n):
+        while self.generation < n or n == 0:
+
             fitness_function(self.population)
 
             self.best_local = self.population[0]
