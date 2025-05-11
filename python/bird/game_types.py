@@ -4,6 +4,10 @@ from neat_ref import *
 
 import pygame
 
+@dataclass
+class FlyBird:
+    body: Bird
+    brain: Genome
 
 @dataclass
 class Graphics:

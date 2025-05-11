@@ -45,7 +45,7 @@ class ManualController(GameController):
 
 
 class NeatController(GameController):
-    def __init__(self, population: Population, render: Render) -> None:
+    def __init__(self, population: PopulationBird, render: Render) -> None:
         self.population = population
         self.render = render
 
@@ -112,5 +112,5 @@ class DynamicController(PhysicsController):
             case 0:
                 return 1
             case _:
-                bird.rotation -= bird.velocity * ROTATION_SCALE
+                bird.rotation -= bird.velocity * BIRD_ROTATION_SCALE
                 return 2

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from population_bird import Population
+from population_bird import PopulationBird
 from renderer import Render
 from pipe import PipeObject
 from controller import *
@@ -43,7 +43,7 @@ def manual_inputs():
 
 
 genome_history = GenomeHistory(NEAT_INPUTS, NEAT_OUTPUT)
-pop = Population(genome_history, NEAT_POP_SIZE, lambda: Bird(genome_history, bird_sprites))
+pop = PopulationBird(genome_history, NEAT_POP_SIZE, lambda: Bird(genome_history, bird_sprites))
 
 render = Render()
 render.set_background("./assets/background-day.png", True, True)
@@ -78,11 +78,9 @@ while True:
     last_pipe = pipe
     pipes = [pipe]
     dt = 0
-    force_reset = False
-    reset = 5000
 
-    while not pop.all_dead() and not player.dead and not force_reset and reset >= 0:
-        reset -= 1
+    while not pop.all_dead() and not player.dead:
+
 
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
@@ -109,10 +107,8 @@ while True:
         if (pipes[:1][0].pos_x <= -PIPE_WIDTH):
             pipes.pop(0)
 
-        dt = clock.tick(FPS) / 1000
+        play_time = clock.tick(FPS)
+        dt = play_time / 1000
         render.display()
-        clock.tick(FPS)
 
-    print(pop.best_global.fitness)
-    pop.best_global.brain.stats_genome()
     gameController.reset()

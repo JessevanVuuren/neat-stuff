@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from controller import PhysicsController, GameController
 from game_types import *
 from neat_ref import *
 from globals import *
@@ -10,21 +9,10 @@ import pygame
 
 
 class Bird:
-    def __init__(self, gh: GenomeHistory, assets: list[list[str]]) -> None:
-        self.physicsController: PhysicsController
-        self.gameController: GameController
-
-        self.pre_action_state = ActionState.STAY
-
+    def __init__(self, assets: list[list[str]]) -> None:
         self.assets: list[list[str]] = assets
-        self.gh = gh
-        self.setup_bird()
+        self.fly_cooldown = .15
 
-    def set_controllers(self, game: GameController, physics: PhysicsController):
-        self.physicsController = physics
-        self.gameController = game
-
-    def setup_bird(self):
         self.current_fly = 0.0
         self.rotation = 0.0
         self.velocity = 0.0
@@ -38,14 +26,7 @@ class Bird:
         self.graphics = Graphics(self.body)
         self.graphics.animation_speed = BIRD_ANIMATION_SPEED
 
-        self.brain = Genome(self.gh)
-        for _ in range(10):
-            self.brain.mutate()
-
         self.set_sprites(self.assets)
-
-    def reset(self):
-        self.setup_bird()
 
     def set_sprites(self, sprites: list[list[str]]):
         self.assets = sprites
@@ -58,7 +39,7 @@ class Bird:
             self.body.height = scaled_img.get_height()
             self.graphics.assets.append(scaled_img)
 
-    def update(self, inputs: Sequence[Pipe], dt: float):
+    def update(self, inputs: Sequence[Pipe], dt: float, gravity:bool):
         pipe = self.closest_pipe(inputs)
 
         if (pipe.top_rect.colliderect(self.body) or pipe.bottom_rect.colliderect(self.body) or self.body.bottomleft[1] >= SCREEN_HEIGHT or self.body.topleft[1] < 0):
@@ -67,26 +48,29 @@ class Bird:
         if self.dead:
             return
 
-        self.fitness += 1
-
         if self.current_fly > 0:
             self.current_fly -= dt
 
         self.update_movement(pipe, dt)
-        self.update_animation(dt)
+        self.update_animation(dt, gravity)
 
     def update_movement(self, pipe: Pipe, dt: float):
-        if (GAME_PLAYER == GamePlayer.NEAT.value):
-            norm_inputs = self.get_inputs(pipe)
-            action = self.think(norm_inputs)
-            self.move(action, dt)
-
         if (GAME_TYPE == GameType.DYNAMIC.value):
             self.velocity += GRAVITY * dt
             self.body.centery += int(self.velocity)
 
-    def update_animation(self, dt: float):
-        image = self.physicsController.animation(self)
+    def update_animation(self, dt: float, gravity: bool):
+        dy = self.pre_pos - self.body.centery
+
+        if (dy > 0):
+            self.rotation = 45
+            image = 0
+        elif (dy == 0):
+            image = 1
+        else:
+            self.rotation -= self.velocity * BIRD_ROTATION_SCALE
+            image = 2
+
         surface = self.graphics.assets[image]
 
         rotated_image = pygame.transform.rotate(surface, self.rotation)
@@ -95,22 +79,12 @@ class Bird:
         self.pre_pos = self.body.centery
         self.graphics.anchor_point = tuple_2_vec2(self.body.topleft)
 
-    def think(self, inputs: list[float]):
-        out = self.brain.get_outputs(inputs)
-        return self.physicsController.think(out)
-
     def closest_pipe(self, pipes: Sequence[Pipe]) -> Pipe:
         for pipe in pipes:
             if pipe.pos_x + PIPE_WIDTH > self.body.topleft[0]:
                 return pipe
 
         return pipes[0]
-
-    def mate(self, parent: Bird):
-        child = Bird(self.gh, self.assets)
-        child.set_controllers(self.gameController, self.physicsController)
-        child.brain = self.brain.crossover(parent.brain)
-        return child
 
     def get_inputs(self, pipe: Pipe):
         inputs: list[float] = []
@@ -122,14 +96,10 @@ class Bird:
 
     def move(self, input: ActionState, dt: float):
 
-        if (self.pre_action_state != input):
-            self.pre_action_state = input
-            self.fitness -= 1
-        
         if input == ActionState.UP:
             self.body.centery -= int(BIRD_SPEED * dt)
         if input == ActionState.DOWN:
             self.body.centery += int(BIRD_SPEED * dt)
         if input == ActionState.FLY and self.current_fly <= 0:
             self.velocity = -BIRD_FLY_FORCE
-            self.current_fly = BIRD_FLY_COOLDOWN
+            self.current_fly = self.fly_cooldown

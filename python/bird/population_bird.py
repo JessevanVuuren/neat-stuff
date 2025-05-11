@@ -7,7 +7,7 @@ from bird import Bird
 import random
 
 
-class Population:
+class PopulationBird:
     def __init__(self, gh: GenomeHistory, pop_size: int, agent: Callable[[], Bird]) -> None:
         self.physicsController: PhysicsController
         self.gameController: GameController
