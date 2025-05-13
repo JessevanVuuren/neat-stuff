@@ -5,3 +5,4 @@ https://www.youtube.com/watch?v=yVtdp1kF0I4&ab_channel=DavidSch%C3%A4fer
 find . -name '*.py' | xargs wc -l
 
 https://github.com/samuelcust/flappy-bird-assets
+https://mypy.readthedocs.io/en/stable/cheat_sheet_py3.html
