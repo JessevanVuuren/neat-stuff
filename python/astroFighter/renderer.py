@@ -12,6 +12,8 @@ class Render:
         self.width = width
 
         self.screen = pygame.display.set_mode((self.width, self.height))
+        self.alpha = pygame.Surface((self.width, self.height), flags=pygame.SRCALPHA)
+
         self.background_layer = None
         pygame.font.init()
 
@@ -48,4 +50,6 @@ class Render:
         self.screen.blit(graph.surface, graph.anchor_point)
 
     def display(self):
+        self.screen.blit(self.alpha, (0, 0))
         pygame.display.flip()
+

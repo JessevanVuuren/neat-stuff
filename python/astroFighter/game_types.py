@@ -3,6 +3,7 @@ from __future__ import annotations
 from pygame import Surface, Vector2, Rect
 from dataclasses import dataclass
 from neat_ref import *
+from globals import *
 from utils import *
 
 import math
@@ -12,6 +13,21 @@ import math
 class Graphic:
     surface: Surface
     anchor_point: Vector2
+
+
+@dataclass
+class FMinMax:
+    min: float
+    max: float
+
+    def __mul__(self, amount: float):
+        return FMinMax(self.min * amount, self.max * amount)
+
+
+@dataclass
+class IMinMax:
+    min: int
+    max: int
 
 
 class Entity(ABC):
@@ -39,17 +55,26 @@ class Entity(ABC):
     def angle(self, value: float):
         self._angle = value
 
+    @property
+    def coins(self) -> int:
+        return self._coins
+
+    @coins.setter
+    def coins(self, amount: int):
+        self._coins = amount
+
     def __init__(self, pos: Vector2, width: float, height: float, angle: float):
         self._pos = pos
         self._width = width
         self._height = height
         self._angle = angle
+        self._coins = 0
 
     def set_xy(self, x: float, y: float):
         self.pos = Vector2(x, y)
 
     @abstractmethod
-    def update(self, delta_time:float): ...
+    def update(self, delta_time: float): ...
 
     def center(self):
         center_x = self.pos.x + self._width / 2
@@ -81,3 +106,13 @@ class Entity(ABC):
 
     def get_rect(self) -> Rect:
         return Rect(self._pos.x, self._pos.y, self._width, self._height)
+
+    def wrap(self):
+        if (self.pos.x > SCREEN_WIDTH):
+            self.pos = Vector2(-self.width, self.pos.y)
+        if (self.pos.y > SCREEN_HEIGHT):
+            self.pos = Vector2(self.pos.x, -self.height)
+        if (self.pos.x < -self.width):
+            self.pos = Vector2(SCREEN_WIDTH, self.pos.y)
+        if (self.pos.y < -self.height):
+            self.pos = Vector2(self.pos.x, SCREEN_HEIGHT)
