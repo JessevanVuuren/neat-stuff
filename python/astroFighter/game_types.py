@@ -7,6 +7,7 @@ from globals import *
 from utils import *
 
 import math
+import uuid
 
 
 @dataclass
@@ -64,12 +65,8 @@ class Entity(ABC):
         self._coins = amount
 
     @property
-    def initial_distance(self) -> float:
-        return self._initial_distance
-
-    @initial_distance.setter
-    def initial_distance(self, amount: float):
-        self._initial_distance = amount
+    def id(self) -> str:
+        return str(self._id)
 
     def __init__(self, pos: Vector2, width: float, height: float, angle: float):
         self._pos = pos
@@ -77,7 +74,8 @@ class Entity(ABC):
         self._height = height
         self._angle = angle
         self._coins = 0
-        self._initial_distance = 0.0
+        self._id = uuid.uuid4()
+
 
     def set_xy(self, x: float, y: float):
         self.pos = Vector2(x, y)

@@ -17,21 +17,37 @@ class Coin(Entity):
 
 class CoinSystem:
     def __init__(self, screen: Surface) -> None:
-        self.coin = self.spawn_coin(Vector2(SCREEN_WIDTH * .8, SCREEN_HEIGHT // 2))
+        self.coins: dict[str, Coin] = {}
+        self.agents: list[Entity] = []
         self.screen = screen
 
-    def spawn_coin(self, position: Vector2 | None = None) -> Coin:
-        if (not position):
-            rand_x = random.randint(10, SCREEN_WIDTH - 10)
-            rand_y = random.randint(10, SCREEN_HEIGHT - 10)
-            position = Vector2(rand_x, rand_y)
+        self.start_pos = Vector2(SCREEN_WIDTH * .8, SCREEN_HEIGHT // 2)
 
-        return Coin(position, 10, 10, "#FFDD33")
+    def set_agents(self, agents: list[Entity]):
+        self.agents = agents
+        self.reset_coins()
+        self.init_coins()
 
-    def update(self, rocked: Entity):
-        if (self.coin.get_rect().colliderect(rocked.get_rect())):
-            rocked.coins += 1
-            self.coin = self.spawn_coin()
-            rocked.initial_distance = rocked.pos.distance_to(self.coin.pos)
+    def reset_coins(self):
+        self.coin_positions = [self.start_pos]
+        self.coins = {}
 
-        self.coin.draw(self.screen)
+    def init_coins(self):
+        for agent in self.agents:
+            self.spawn_coin(agent)
+
+    def spawn_coin(self, agent: Entity):
+        x = random.randint(10, SCREEN_WIDTH - 10)
+        y = random.randint(10, SCREEN_HEIGHT - 10)
+        pos = Vector2(x, y)
+        self.coins[agent.id] = Coin(pos, 10, 10, "#FFDD33")
+
+    def update(self, agent: Entity):
+        if (self.coins[agent.id].get_rect().colliderect(agent.get_rect())):
+            agent.coins += 1
+
+            self.spawn_coin(agent)
+
+    def draw(self):
+        for coin in self.coins.values():
+            coin.draw(self.screen)

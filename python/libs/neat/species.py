@@ -1,60 +1,59 @@
+from .genome_history import GenomeHistory
 from .genome import Genome
 import random
 
 
 class Species:
-    def __init__(self, mem) -> None:
-        self.members: list[Genome] = []
-        self.members.append(mem)
-        self.rep = self.members[0]
-
-        self.max_members = 8
-        
-        self.average_fitness = 0
+    def __init__(self, member: Genome) -> None:
+        self.members: list[Genome] = [member]
+        self.rep: Genome = member
+        self.average_fitness = 0.0
         self.allow_offspring = 0
-        
-        self.threshold = 3.5
-
-        # No. of generations species hasn't improved
         self.staleness = 0
+        self.best_fitness = member.fitness
 
-    def add(self, brain):
-        self.members.append(brain)
+    def update_staleness(self):
+        max_member = max([m.fitness for m in self.members])
+        if max_member > self.best_fitness:
+            self.best_fitness = max_member
+            self.staleness = 0
+        else:
+            self.staleness += 1
 
-        if self.rep.fitness < brain.fitness:
-            self.rep = self.members[-1]
+    def add(self, genome: Genome):
+        self.members.append(genome)
+        if genome.fitness > self.rep.fitness:
+            self.rep = genome
 
-    def get_random_parent(self):
-        # random member, give bias to high performing members
-        total_priority = sum([m.adjusted_fitness for m in self.members])
+    def check(self, genome: Genome, threshold: float) -> bool:
+        compatibility = self.rep.calculate_compatibility(genome)
+        return compatibility < threshold
+
+    def adjusted_fitness(self):
+        for genome in self.members:
+            genome.adjusted_fitness = genome.fitness / len(self.members)
+
+    def get_total_adjusted_fitness(self) -> float:
+        return sum([g.adjusted_fitness for g in self.members])
+
+    def get_average_fitness(self) -> float:
+        self.average_fitness = self.get_total_adjusted_fitness() / len(self.members)
+        return self.average_fitness
+
+    def get_random_parent(self) -> Genome:
+        total_priority = sum(g.adjusted_fitness for g in self.members)
         selection = random.uniform(0, total_priority)
 
         current = 0
-        for i, member in enumerate(self.members):
-            current += member.adjusted_fitness
-            if (current >= selection):
-                return self.members[i]
-
+        for g in self.members:
+            current += g.adjusted_fitness
+            if current >= selection:
+                return g
         return self.rep
 
-    def give_random_offspring(self):
+    def give_random_offspring(self, gh: GenomeHistory) -> Genome:
         parent1 = self.get_random_parent()
         parent2 = self.get_random_parent()
         child = parent1.crossover(parent2)
         child.mutate()
         return child
-
-    def check(self, brain):
-        done = False
-        cd = self.rep.calculate_compatibility(brain)
-        if cd < self.threshold and len(self.members) < self.max_members:
-            done = True
-
-        return done
-
-    def adjusted_fitness(self):
-        for i in range(len(self.members)):
-            self.members[i].adjusted_fitness = self.members[i].fitness / len(self.members)
-
-    def get_average_fitness(self):
-        return sum([m.adjusted_fitness for m in self.members]) / len(self.members)
