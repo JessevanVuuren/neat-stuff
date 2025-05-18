@@ -21,7 +21,7 @@ class Genome:
         self.nodes: list[Node] = []
         self.genes: list[Gene] = []
 
-        self.fitness = random.uniform(0, 200)
+        self.fitness = 0.0
         self.adjusted_fitness = 0.0
 
         for _ in range(self.inputs):
@@ -34,7 +34,11 @@ class Genome:
 
     def clone(self):
         clone = Genome(self.genome_history)
+        
         clone.total_nodes = self.total_nodes
+        clone.adjusted_fitness = self.adjusted_fitness
+        clone.fitness = self.fitness
+        
         clone.nodes.clear()
         clone.genes.clear()
 

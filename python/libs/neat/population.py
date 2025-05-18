@@ -27,8 +27,8 @@ class Population:
     def reset(self):
         self.generation += 1
 
-        parents = self.population
-        self.population = []
+        parents = self.population.copy()
+        self.population.clear()
 
         parents.sort(key=lambda x: x.fitness, reverse=True)
 
@@ -41,6 +41,8 @@ class Population:
 
             self.population.append(child)
 
+        self.population[0] = parents[0].clone()
+
     def run(self, fitness_function: Callable[[list[Genome]], None], n: int = 0):
 
 
@@ -51,10 +53,10 @@ class Population:
             self.best_local = self.population[0]
             for genome in self.population:
                 if (genome.fitness > self.best_local.fitness):
-                    self.best_local = genome
+                    self.best_local = genome.clone()
 
             if (self.best_local.fitness > self.best_global.fitness):
-                self.best_global = self.best_local
+                self.best_global = self.best_local.clone()
 
             print("Local Fitness: ", self.best_local.fitness)
             print("Global Fitness: ", self.best_global.fitness)

@@ -61,7 +61,6 @@ class Spaceship(Entity):
 
         self.pos += self.velocity * delta_time
         self.velocity *= self.magic_drag
-        print(self.velocity.x)
 
         self.update_graphic()
         self.wrap()

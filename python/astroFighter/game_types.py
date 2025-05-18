@@ -63,12 +63,21 @@ class Entity(ABC):
     def coins(self, amount: int):
         self._coins = amount
 
+    @property
+    def initial_distance(self) -> float:
+        return self._initial_distance
+
+    @initial_distance.setter
+    def initial_distance(self, amount: float):
+        self._initial_distance = amount
+
     def __init__(self, pos: Vector2, width: float, height: float, angle: float):
         self._pos = pos
         self._width = width
         self._height = height
         self._angle = angle
         self._coins = 0
+        self._initial_distance = 0.0
 
     def set_xy(self, x: float, y: float):
         self.pos = Vector2(x, y)
