@@ -1,11 +1,9 @@
 from __future__ import annotations
-from webbrowser import get
 from .genome_history import *
 from itertools import count
 from .gene import *
 from .node import *
 import random
-
 
 
 class Genome:
@@ -78,13 +76,13 @@ class Genome:
         if len(self.genes) == 0:
             self.add_gene()
 
-        if random.random() < .5:  # add gene
+        if random.random() < .5:
             self.add_gene()
-        if random.random() < 1:  # add node
+        if random.random() < .2:
             self.add_node()
-        if random.random() < 0:  # remove gene
+        if random.random() < .5:
             self.remove_gene()
-        if random.random() < 1:  # remove node
+        if random.random() < .2:
             self.remove_node()
 
         for i in range(len(self.genes)):
@@ -105,10 +103,8 @@ class Genome:
             self.add_gene()
 
         enabled_genes = [g for g in self.genes if g.enabled]
-        print(enabled_genes)
 
         if not enabled_genes:
-            print("no genes to split")
             return
 
         gene = random.choice(enabled_genes)
@@ -128,7 +124,7 @@ class Genome:
         if (self.inputs + self.outputs >= len(self.nodes)):
             return
 
-        nodes = self.nodes[self.inputs:-self.outputs]
+        nodes = [n for n in self.nodes if n.layer != 1 and n.layer != 0]
         node_to_delete = random.choice(nodes)
 
         genes_to_delete: list[Gene] = []
@@ -141,9 +137,6 @@ class Genome:
 
         self.nodes.remove(node_to_delete)
         self.total_nodes -= 1
-
-        for i, node in enumerate(self.nodes):
-            node.number = i
 
     def remove_gene(self):
         if (len(self.genes) == 0):
@@ -200,19 +193,16 @@ class Genome:
 
         self.connect_genes()
 
-        for layer in range(2, self.genome_history.highest_hidden + 1):
-            nodes_in_layer: list[Node] = []
-            for n in range(len(self.nodes)):
-                if self.nodes[n].layer == layer:
-                    nodes_in_layer.append(self.nodes[n])
+        nodes = [n for n in self.nodes[self.inputs + self.outputs:]]
+        nodes.sort(key=lambda x: x.layer)
 
-            for n in range(len(nodes_in_layer)):
-                nodes_in_layer[n].calculate()
+        for node in nodes:
+            node.calculate()
 
         final_outputs: list[float] = []
-        for n in range(self.inputs, self.inputs + self.outputs):
-            self.nodes[n].calculate()
-            final_outputs.append(self.nodes[n].output)
+        for i in range(self.inputs, self.inputs + self.outputs):
+            self.nodes[i].calculate()
+            final_outputs.append(self.nodes[i].output)
 
         return final_outputs
 
@@ -255,6 +245,8 @@ class Genome:
             p1_highest_innovation if self.fitness > partner.fitness else p2_highest_innovation
         )
 
+        valid_node_ids = {n.number for n in child.nodes}
+
         for i in range(highest_innovation + 1):
             e1 = self.exists(i)
             e2 = partner.exists(i)
@@ -265,12 +257,13 @@ class Genome:
                         if (random.random()) < 0.5
                         else partner.get_gene(i)
                     )
+                elif e1:
+                    gene = self.get_gene(i)
+                else:
+                    gene = partner.get_gene(i)
+                
+                if gene.in_node.number in valid_node_ids and gene.out_node.number in valid_node_ids:
                     child.genes.append(gene)
-                    continue
-                if e1:
-                    child.genes.append(self.get_gene(i))
-                if e2:
-                    child.genes.append(partner.get_gene(i))
 
         child.connect_genes()
         return child
@@ -329,3 +322,13 @@ class Genome:
         delta = E + D + W
 
         return delta
+
+    def info(self):
+        print(f"Nodes: len nodes: {len(self.nodes)}")
+        print(f"Genes: len genes: {len(self.genes)}")
+        print(f"Inputs nodes: {self.inputs}")
+        print(f"Outputs nodes: {self.outputs}")
+        
+        layers = {x.layer for x in self.nodes}
+
+        print(f"Layers: {len(layers)}")

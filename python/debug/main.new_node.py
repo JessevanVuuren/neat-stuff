@@ -10,11 +10,23 @@ brain = Genome(gh)
 dg.print_genome(brain)
 dg.history_info(brain.genome_history)
 
-brain.mutate()
+for i in range(1000):
+    brain.mutate()
 
-print()
-print()
 print()
 
 dg.print_genome(brain)
 dg.history_info(brain.genome_history)
+
+
+layers: set[float] = set()
+
+for i in brain.nodes:
+    layers.add(i.layer)
+
+print()
+print()
+
+out = brain.get_outputs([0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5])
+print(out)
+print()

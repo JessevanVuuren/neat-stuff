@@ -4,14 +4,11 @@ from .node import *
 
 class GenomeHistory(object):
     def __init__(self, inputs:int, outputs:int) -> None:
-        self.inputs = inputs
         self.outputs = outputs
+        self.inputs = inputs
 
         self.all_genes: list[Gene] = []
-
         self.global_innovation = 0
-
-        self.highest_hidden = 2
 
     def exists(self, n1: Node, n2: Node):
         for c in self.all_genes:
@@ -19,3 +16,6 @@ class GenomeHistory(object):
                 return c.clone()
 
         return None
+
+
+

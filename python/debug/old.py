@@ -35,3 +35,35 @@
         self.genes[-2].weight = g.weight
         g.enabled = False
         self.nodes.append(n)
+
+
+
+
+    def get_outputs(self, inputs: list[float]) -> list[float]:
+        if len(inputs) != self.inputs:
+            raise RuntimeError("Wrong number of inputs")
+
+        for node in self.nodes:
+            node.output = 0
+            node.genes = []
+
+        for i in range(self.inputs):
+            self.nodes[i].output = inputs[i]
+
+        self.connect_genes()
+
+        for layer in range(2, self.genome_history.highest_hidden + 1):
+            nodes_in_layer: list[Node] = []
+            for n in range(len(self.nodes)):
+                if self.nodes[n].layer == layer:
+                    nodes_in_layer.append(self.nodes[n])
+
+            for n in range(len(nodes_in_layer)):
+                nodes_in_layer[n].calculate()
+
+        final_outputs: list[float] = []
+        for n in range(self.inputs, self.inputs + self.outputs):
+            self.nodes[n].calculate()
+            final_outputs.append(self.nodes[n].output)
+
+        return final_outputs

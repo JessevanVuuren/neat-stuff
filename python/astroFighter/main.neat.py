@@ -68,7 +68,7 @@ def eval(genomes: list[Genome]):
 
     for genome in genomes:
         player = Rocket(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, rocket_image, ps)
-        spaceman.append(SpaceMan(player, genomeSlow))
+        spaceman.append(SpaceMan(player, genome))
 
     delta_time = 0
     elapsed_time = 0
@@ -109,12 +109,8 @@ def eval(genomes: list[Genome]):
     for rocket in spaceman:
         rocket.brain.fitness -= rocket.player.idle_time * .1
 
-
     print("== Best Genome struct")
-    print(f"Nodes: len nodes: {len(pop.best_global.nodes)}")
-    print(f"Genes: len genes: {len(pop.best_global.genes)}")
-    print(f"inputs nodes: {pop.best_global.inputs}")
-    print(f"outputs nodes: {pop.best_global.outputs}")
+    pop.best_global.info()
 
 pop.run(eval)
 
