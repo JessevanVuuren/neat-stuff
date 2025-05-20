@@ -1,8 +1,11 @@
 from __future__ import annotations
+from webbrowser import get
 from .genome_history import *
+from itertools import count
 from .gene import *
 from .node import *
 import random
+
 
 
 class Genome:
@@ -16,7 +19,7 @@ class Genome:
         self.output_layer = 10
 
         self.total_nodes = 0
-        self.create_rate = .6
+        self.node_indexer = None
 
         self.nodes: list[Node] = []
         self.genes: list[Gene] = []
@@ -34,11 +37,11 @@ class Genome:
 
     def clone(self):
         clone = Genome(self.genome_history)
-        
+
         clone.total_nodes = self.total_nodes
         clone.adjusted_fitness = self.adjusted_fitness
         clone.fitness = self.fitness
-        
+
         clone.nodes.clear()
         clone.genes.clear()
 
@@ -75,13 +78,17 @@ class Genome:
         if len(self.genes) == 0:
             self.add_gene()
 
-        if random.random() < 0.8:
-            for i in range(len(self.genes)):
-                self.genes[i].mutate()
-        if random.random() < 0.08:
+        if random.random() < .5:  # add gene
             self.add_gene()
-        if random.random() < 0.02:
+        if random.random() < 1:  # add node
             self.add_node()
+        if random.random() < 0:  # remove gene
+            self.remove_gene()
+        if random.random() < 1:  # remove node
+            self.remove_node()
+
+        for i in range(len(self.genes)):
+            self.genes[i].mutate()
 
     def add_gene(self):
         n1 = random.choice(self.nodes)
@@ -97,39 +104,54 @@ class Genome:
         if len(self.genes) == 0:
             self.add_gene()
 
-        if random.random() < 0.2:
-            self.genome_history.highest_hidden += 1
+        enabled_genes = [g for g in self.genes if g.enabled]
+        print(enabled_genes)
 
-        n = Node(self.total_nodes, random.randint(2, self.genome_history.highest_hidden))
+        if not enabled_genes:
+            print("no genes to split")
+            return
+
+        gene = random.choice(enabled_genes)
+        get_node_id = self.get_new_node_key()
+        node = Node(get_node_id, (gene.in_node.layer + gene.out_node.layer) / 2)
+
         self.total_nodes += 1
-
-        g = random.choice(self.genes)
-        l1 = g.in_node.layer
-        l2 = g.out_node.layer
-        if l2 == 1:
-            l2 = 1000000
-
-        attempts = 0
-        max_attempts = 100
-
-        while (l1 > n.layer or l2 < n.layer) and attempts < max_attempts:
-            g = random.choice(self.genes)
-            l1 = g.in_node.layer
-            l2 = g.out_node.layer
-            if l2 == 1:
-                l2 = 1000000
-            attempts += 1
-
-        if attempts == max_attempts:
-            return  # could not find a valid gene, safely abort
-
-        self.connect_nodes(g.in_node, n)
-        self.connect_nodes(n, g.out_node)
+        self.connect_nodes(gene.in_node, node)
+        self.connect_nodes(node, gene.out_node)
 
         self.genes[-1].weight = 1.0
-        self.genes[-2].weight = g.weight
-        g.enabled = False
-        self.nodes.append(n)
+        self.genes[-2].weight = gene.weight
+        gene.enabled = False
+        self.nodes.append(node)
+
+    def remove_node(self):
+        if (self.inputs + self.outputs >= len(self.nodes)):
+            return
+
+        nodes = self.nodes[self.inputs:-self.outputs]
+        node_to_delete = random.choice(nodes)
+
+        genes_to_delete: list[Gene] = []
+        for gene in self.genes:
+            if (gene.in_node.number == node_to_delete.number or gene.out_node.number == node_to_delete.number):
+                genes_to_delete.append(gene)
+
+        for gene in genes_to_delete:
+            self.genes.remove(gene)
+
+        self.nodes.remove(node_to_delete)
+        self.total_nodes -= 1
+
+        for i, node in enumerate(self.nodes):
+            node.number = i
+
+    def remove_gene(self):
+        if (len(self.genes) == 0):
+            return
+
+        if self.genes:
+            delete_index = random.randint(0, len(self.genes) - 1)
+            self.genes.pop(delete_index)
 
     def get_node(self, n: int):
         for i in range(len(self.nodes)):
@@ -145,6 +167,14 @@ class Genome:
 
         raise Exception(f"Gene not found, innovation: {innovation}")
 
+    def get_new_node_key(self):
+        if self.node_indexer is None:
+            self.node_indexer = count(len(self.nodes) + 1)
+
+        new_id = next(self.node_indexer)
+
+        return new_id
+
     def connect_genes(self):
 
         for i in range(len(self.genes)):
@@ -159,8 +189,7 @@ class Genome:
 
     def get_outputs(self, inputs: list[float]) -> list[float]:
         if len(inputs) != self.inputs:
-            print("Wrong number of inputs")
-            return [-1]
+            raise RuntimeError("Wrong number of inputs")
 
         for node in self.nodes:
             node.output = 0
@@ -300,9 +329,3 @@ class Genome:
         delta = E + D + W
 
         return delta
-
-    def stats_genome(self):
-        print()
-        print("nodes:", len(self.nodes))
-        print("genes:", len(self.genes))
-        print()

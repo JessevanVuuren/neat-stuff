@@ -3,7 +3,7 @@ import math
 
 
 class Node:
-    def __init__(self, n:int, l:int) -> None:
+    def __init__(self, n:int, l:float) -> None:
         self.number = n
         self.layer = l  # type -> input, hidden bias
 

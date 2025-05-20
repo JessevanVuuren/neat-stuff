@@ -60,7 +60,7 @@ def get_inputs(rocket: Entity, next_coin: Coin) -> list[float]:
     ]
 
 
-genome = load_genome("best_genome_score_10")
+genome = load_genome("best_genome_")
 spaceman = SpaceMan(player, genome)
 
 while exit_events():

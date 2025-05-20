@@ -35,10 +35,10 @@ cs = CoinSystem(render.screen)
 st = StarSystem(render.alpha, 60, FMinMax(.7, 1), FMinMax(1, 3), FMinMax(.1, 2), ["#f2dfaa", "#ddb1f0", "#c3c2f2", "#f2b8c1", "#b5f2f7", "#ffffff", "#ffffff", "#ffffff", "#ffffff"])
 
 genome_history = GenomeHistory(8, 3)
-pop = PopulationSpecies(genome_history, 50)
+pop = Population(genome_history, 50)
 
 rocket_image = img_scaler(pygame.image.load("./rocket.png"), .06)
-
+genomeSlow = load_genome("best_genome_slow")
 
 @dataclass
 class SpaceMan:
@@ -68,7 +68,7 @@ def eval(genomes: list[Genome]):
 
     for genome in genomes:
         player = Rocket(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, rocket_image, ps)
-        spaceman.append(SpaceMan(player, genome))
+        spaceman.append(SpaceMan(player, genomeSlow))
 
     delta_time = 0
     elapsed_time = 0
@@ -109,6 +109,12 @@ def eval(genomes: list[Genome]):
     for rocket in spaceman:
         rocket.brain.fitness -= rocket.player.idle_time * .1
 
+
+    print("== Best Genome struct")
+    print(f"Nodes: len nodes: {len(pop.best_global.nodes)}")
+    print(f"Genes: len genes: {len(pop.best_global.genes)}")
+    print(f"inputs nodes: {pop.best_global.inputs}")
+    print(f"outputs nodes: {pop.best_global.outputs}")
 
 pop.run(eval)
 
