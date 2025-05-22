@@ -22,6 +22,8 @@ class Genome:
         self.nodes: list[Node] = []
         self.genes: list[Gene] = []
 
+        self.sorted_nodes: list[Node] = []
+
         self.fitness = 0.0
         self.adjusted_fitness = 0.0
 
@@ -50,6 +52,7 @@ class Genome:
             clone.genes.append(self.genes[i].clone())
 
         clone.connect_genes()
+        self.cache_sorted_nodes()
         return clone
 
     def connect_nodes(self, n1: Node, n2: Node):
@@ -69,8 +72,12 @@ class Genome:
         else:
             x.innovation = self.genome_history.global_innovation
             self.genome_history.global_innovation += 1
-            self.genome_history.all_genes.append(x)
+            self.genome_history.add_gene(x)
             self.genes.append(x)
+
+    def cache_sorted_nodes(self):
+        self.sorted_nodes = [n for n in self.nodes[self.inputs + self.outputs:]]
+        self.sorted_nodes.sort(key=lambda x: x.layer)
 
     def mutate(self):
         if len(self.genes) == 0:
@@ -87,6 +94,9 @@ class Genome:
 
         for i in range(len(self.genes)):
             self.genes[i].mutate()
+
+        self.connect_genes()
+        self.cache_sorted_nodes()
 
     def add_gene(self):
         n1 = random.choice(self.nodes)
@@ -186,17 +196,12 @@ class Genome:
 
         for node in self.nodes:
             node.output = 0
-            node.genes = []
+            node.calculated = False
 
         for i in range(self.inputs):
             self.nodes[i].output = inputs[i]
 
-        self.connect_genes()
-
-        nodes = [n for n in self.nodes[self.inputs + self.outputs:]]
-        nodes.sort(key=lambda x: x.layer)
-
-        for node in nodes:
+        for node in self.sorted_nodes:
             node.calculate()
 
         final_outputs: list[float] = []
@@ -261,11 +266,12 @@ class Genome:
                     gene = self.get_gene(i)
                 else:
                     gene = partner.get_gene(i)
-                
+
                 if gene.in_node.number in valid_node_ids and gene.out_node.number in valid_node_ids:
                     child.genes.append(gene)
 
         child.connect_genes()
+        self.cache_sorted_nodes()
         return child
 
     def calculate_compatibility(self, partner: Genome):
@@ -328,7 +334,7 @@ class Genome:
         print(f"Genes: len genes: {len(self.genes)}")
         print(f"Inputs nodes: {self.inputs}")
         print(f"Outputs nodes: {self.outputs}")
-        
+
         layers = {x.layer for x in self.nodes}
 
         print(f"Layers: {len(layers)}")

@@ -1,9 +1,8 @@
 from __future__ import annotations
-from collections.abc import Callable
 
-from .genome import Genome
 from .genome_history import GenomeHistory
-
+from collections.abc import Callable
+from .genome import Genome
 
 import random
 
@@ -18,7 +17,7 @@ class Population:
 
         for _ in range(self.pop_size):
             genome = Genome(self.gh)
-            [genome.mutate() for _ in range(10)]
+            genome.mutate()
             self.population.append(genome)
 
         self.best_local = self.population[0]

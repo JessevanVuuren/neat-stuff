@@ -2,20 +2,19 @@ from .gene import *
 from .node import *
 
 
-class GenomeHistory(object):
+class GenomeHistory:
     def __init__(self, inputs:int, outputs:int) -> None:
         self.outputs = outputs
         self.inputs = inputs
 
-        self.all_genes: list[Gene] = []
+        self.all_genes: dict[tuple[int, int], Gene] = {}
         self.global_innovation = 0
 
+    def add_gene(self, gene:Gene):
+        self.all_genes[gene.in_node.number, gene.out_node.number] = gene
+
     def exists(self, n1: Node, n2: Node):
-        for c in self.all_genes:
-            if c.in_node.number == n1.number and c.out_node.number == n2.number:
-                return c.clone()
+        return self.all_genes.get((n1.number, n2.number))
 
-        return None
-
-
-
+# dict   5131137   22.517    0.000   22.517    0.000 genome.py:213(exists)
+# list   6349005   30.676    0.000   30.676    0.000 genome.py:213(exists)

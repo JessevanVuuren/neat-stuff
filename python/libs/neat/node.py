@@ -8,6 +8,7 @@ class Node:
         self.layer = l  # type -> input, hidden bias
 
         self.output:float = 0
+        self.calculated = False
 
         self.genes: list[Gene] = []
 
@@ -20,8 +21,10 @@ class Node:
         return n
 
     def calculate(self):
-        if self.layer == 0:
+        if self.calculated:
             return
+
+        self.calculated = True
 
         s = 0
         for g in self.genes:
