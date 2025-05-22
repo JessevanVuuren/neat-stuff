@@ -16,5 +16,4 @@ class DebugGenome:
 
     def history_info(self, gh: GenomeHistory):
         print(f"GenomeHistory len genes: {len(gh.all_genes)}")
-        print(f"GenomeHistory highest_hidden: {gh.highest_hidden}")
 
