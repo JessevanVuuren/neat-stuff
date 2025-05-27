@@ -35,10 +35,11 @@ cs = CoinSystem(render.screen)
 st = StarSystem(render.alpha, 60, FMinMax(.7, 1), FMinMax(1, 3), FMinMax(.1, 2), ["#f2dfaa", "#ddb1f0", "#c3c2f2", "#f2b8c1", "#b5f2f7", "#ffffff", "#ffffff", "#ffffff", "#ffffff"])
 
 genome_history = GenomeHistory(8, 3)
-pop = Population(genome_history, 200)
+pop = Population(genome_history, 100)
 
 rocket_image = img_scaler(pygame.image.load("./rocket.png"), .06)
 
+DIAGONAL = math.sqrt(SCREEN_WIDTH * SCREEN_WIDTH + SCREEN_HEIGHT + SCREEN_HEIGHT)
 
 @dataclass
 class SpaceMan:
@@ -59,7 +60,7 @@ def get_inputs(rocket: Entity, next_coin: Coin) -> list[float]:
         math.sin(rocket.angle*0.0174532925),
         math.cos(rocket.angle*0.0174532925),
         direction_norm.x,
-        direction_norm.y
+        direction_norm.y,
     ]
 
 
@@ -67,7 +68,7 @@ def eval(genomes: list[Genome]):
     spaceman: list[SpaceMan] = []
 
     for genome in genomes:
-        player = Rocket(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, rocket_image, ps)
+        player = Rocket(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, rocket_image, ps, True)
         spaceman.append(SpaceMan(player, genome))
 
     delta_time = 0
@@ -75,7 +76,7 @@ def eval(genomes: list[Genome]):
 
     cs.set_agents([x.player for x in spaceman])
 
-    while len(spaceman) > 0 and game_events() and elapsed_time < 10:
+    while len(spaceman) > 0 and game_events() and elapsed_time < 1000:
         elapsed_time += 1
 
         render.fill("#000000")
@@ -90,7 +91,7 @@ def eval(genomes: list[Genome]):
             rocket.player.update_neat(delta_time, outputs)
 
             cs.update(rocket.player)
-            # render.surface(rocket.player.graphic)
+            render.surface(rocket.player.graphic)
 
         ps.update(delta_time)
         st.update(delta_time)
@@ -109,11 +110,11 @@ def eval(genomes: list[Genome]):
     for rocket in spaceman:
         rocket.brain.fitness -= rocket.player.idle_time * .1
 
-    print(f"== Best Genome struct, generation: {pop.generation}")
-    pop.best_global.info()
-    print(f"len genes history: {len(genome_history.all_genes)}")
+    # woow = [f"{x.fitness:.4f}" for x in pop.population]
+    # woow.sort(reverse=True)
+    # print(woow)
 
 
-pop.run(eval, 50)
+pop.run(eval, report=True)
 
 pygame.quit()

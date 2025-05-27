@@ -1,14 +1,15 @@
-from debug_genome import DebugGenome
 from neat_ref import *
 
-brain = load_genome("best_genome_slow")
-# brain = load_genome("best_genome_260_gen")
+gh = GenomeHistory(3,1)
+pop = Population(gh, 10)
 
 
-dg = DebugGenome()
+def eval(g:list[Genome]):
+    for i in g:
+        print(i.get_outputs([0.5, 0.5, 0.5]))
 
-dg.print_genome(brain)
-dg.history_info(brain.genome_history)
 
-brain.mutate()
+pop.run(eval, 5)
+
+
 

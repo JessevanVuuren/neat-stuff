@@ -12,8 +12,9 @@ import math
 
 class Rocket(Entity):
 
-    def __init__(self, x: float, y: float, image: pygame.Surface, ps: ParticleSystem):
+    def __init__(self, x: float, y: float, image: pygame.Surface, ps: ParticleSystem, training_mode:bool=False):
         Entity.__init__(self, pygame.Vector2(x, y), image.get_rect().w, image.get_rect().h, 0)
+        self.training_mode = training_mode
         self.idle_time = 0.0
 
         self.velocity = 0
@@ -55,7 +56,7 @@ class Rocket(Entity):
 
     def update_neat(self, delta_time: float, inputs: list[float]):
         self.idle_time += delta_time
-        if (max(inputs) > .5):
+        if inputs[0] > .5:
             self.idle_time = 0.0
 
         if inputs[0] > .5:
@@ -78,10 +79,11 @@ class Rocket(Entity):
         self.wrap()
 
     def thrust_effect(self, pos: Vector2):
-        pass
-        # x, y = pos
-        # self.ps.add_particle(ParticleExhaust(self, x, y, 3, .1, self.exhaustRange, 4, 30))
-        # self.ps.add_particle(ParticleSmoke(self, x - 39, y * 1.2, 4, 1, self.smokeRange, 15))
+        if self.training_mode:
+            return
+        x, y = pos
+        self.ps.add_particle(ParticleExhaust(self, x, y, 3, .1, self.exhaustRange, 4, 30))
+        self.ps.add_particle(ParticleSmoke(self, x - 39, y * 1.2, 4, 1, self.smokeRange, 15))
 
     def move(self):
         radians = math.radians(self.angle)
