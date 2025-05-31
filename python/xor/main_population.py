@@ -21,7 +21,6 @@ xor_values: list[XorInput] = [
 gh = GenomeHistory(2, 1)
 pop = Population(gh, 100)
 
-
 def eval_fitness(genomes: list[Genome]):
 
     for genome in genomes:

@@ -45,37 +45,36 @@ class Rocket(Entity):
 
         if keys[pygame.K_a]:
             self.thrust_effect(self.right_thrust_pos)
-            self.angle -= ROTATION_VELOCITY
+            self.angle -= ROTATION_VELOCITY * delta_time
         if keys[pygame.K_d]:
             self.thrust_effect(self.left_thrust_pos)
-            self.angle += ROTATION_VELOCITY
+            self.angle += ROTATION_VELOCITY * delta_time
 
         self.update_graphic()
-        self.move()
+        self.move(delta_time)
         self.wrap()
 
     def update_neat(self, delta_time: float, inputs: list[float]):
         self.idle_time += delta_time
-        if inputs[0] > .5:
+    
+        if inputs[0] > 0.5:
             self.idle_time = 0.0
-
-        if inputs[0] > .5:
             self.thrust_effect(self.middle_thrust_pos)
-            self.velocity = min(self.velocity + ACCELERATION, MAX_VELOCITY)
-        elif (self.velocity > 0):
-            self.velocity = self.velocity * math.pow((1 - BRAKE_FORCE), delta_time)
+            self.velocity = min(self.velocity + ACCELERATION * delta_time, MAX_VELOCITY)
+        elif self.velocity > 0:
+            self.velocity *= math.pow((1 - BRAKE_FORCE), delta_time)
         else:
             self.velocity = 0
 
-        if inputs[1] > .5:
+        if inputs[1] > 0.5:
             self.thrust_effect(self.right_thrust_pos)
-            self.angle -= ROTATION_VELOCITY
-        if inputs[2] > .5:
+            self.angle -= ROTATION_VELOCITY * delta_time
+        if inputs[2] > 0.5:
             self.thrust_effect(self.left_thrust_pos)
-            self.angle += ROTATION_VELOCITY
+            self.angle += ROTATION_VELOCITY * delta_time
 
         self.update_graphic()
-        self.move()
+        self.move(delta_time)
         self.wrap()
 
     def thrust_effect(self, pos: Vector2):
@@ -85,10 +84,10 @@ class Rocket(Entity):
         self.ps.add_particle(ParticleExhaust(self, x, y, 3, .1, self.exhaustRange, 4, 30))
         self.ps.add_particle(ParticleSmoke(self, x - 39, y * 1.2, 4, 1, self.smokeRange, 15))
 
-    def move(self):
+    def move(self, delta_time:float):
         radians = math.radians(self.angle)
-        vertical = math.cos(radians) * self.velocity
-        horizontal = math.sin(radians) * self.velocity
+        vertical = math.cos(radians) * self.velocity * delta_time
+        horizontal = math.sin(radians) * self.velocity * delta_time
 
         self.pos.x += vertical
         self.pos.y += horizontal

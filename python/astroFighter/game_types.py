@@ -1,4 +1,5 @@
 from __future__ import annotations
+from abc import ABC, abstractmethod
 
 from pygame import Surface, Vector2, Rect
 from dataclasses import dataclass

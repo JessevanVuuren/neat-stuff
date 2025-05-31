@@ -21,15 +21,12 @@ class CoinSystem:
         self.agents: list[Entity] = []
         self.screen = screen
 
-        self.start_pos = Vector2(SCREEN_WIDTH * .8, SCREEN_HEIGHT // 2)
-
     def set_agents(self, agents: list[Entity]):
         self.agents = agents
         self.reset_coins()
         self.init_coins()
 
     def reset_coins(self):
-        self.coin_positions = [self.start_pos]
         self.coins = {}
 
     def init_coins(self):
@@ -39,6 +36,7 @@ class CoinSystem:
     def spawn_coin(self, agent: Entity):
         x = random.randint(10, SCREEN_WIDTH - 10)
         y = random.randint(10, SCREEN_HEIGHT - 10)
+
         pos = Vector2(x, y)
         self.coins[agent.id] = Coin(pos, 10, 10, "#FFDD33")
 

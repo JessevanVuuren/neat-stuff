@@ -49,7 +49,9 @@ class Population:
 
         while self.generation < n or n == 0:
 
+            start_sim = time.perf_counter()
             fitness_function(self.population)
+            stop_sim = time.perf_counter()
 
             self.best_local = self.population[0]
             for genome in self.population:
@@ -59,16 +61,19 @@ class Population:
             if (self.best_local.fitness > self.best_global.fitness):
                 self.best_global = self.best_local.clone()
 
-            start = time.perf_counter()
+            start_reset = time.perf_counter()
             self.reset()
-            stop = time.perf_counter()
+            stop_reset = time.perf_counter()
 
             if (report):
-                self.report(stop - start)
+                sim_time = stop_sim - start_sim
+                reset_time = stop_reset - start_reset
+                self.report(reset_time, sim_time)
 
-    def report(self, execution_time: float):
+    def report(self, reset_time: float, sim_time:float):
         print(f"=== [Generation: {self.generation}] ===")
-        print(f"Reset time: {execution_time:.4f}ms")
+        print(f"Reset time: {reset_time:.4f}ms")
+        print(f"ium time: {sim_time:.4f}ms")
         print(f"Local Fitness: {self.best_local.fitness:.6f}")
         print(f"Global Fitness: {self.best_global.fitness:.6f}")
         print(f"Genes history: {len(self.gh.all_genes)}")

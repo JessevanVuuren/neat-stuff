@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from neat_ref import *
 import time
 
@@ -29,7 +30,7 @@ def eval_fitness(genomes: list[Genome]):
             out = genome.get_outputs(xor.inputs)
             genome.fitness -= (out[0] - xor.output) ** 2
 
-pop.run(eval_fitness, 100)
+pop.run(eval_fitness)
 
 
 print("Gen:", pop.generation, "Fitness:", pop.best_global.fitness)
@@ -41,8 +42,6 @@ print()
 
 pop.best_global.info()
 
-print()
-print(f"total time: {time.perf_counter() - start}")
 
 # 39657254 function calls (39651299 primitive calls) in 62.935 seconds
 # 41525770 function calls (41519815 primitive calls) in 59.742 seconds -> genome_history map

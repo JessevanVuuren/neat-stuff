@@ -14,7 +14,7 @@ import pygame
 def exit_events():
     for event in pygame.event.get():
         if (event.type == pygame.QUIT):
-            return False
+            pygame.quit()
 
     return True
 
@@ -30,8 +30,8 @@ ps = ParticleSystem(render.screen)
 cs = CoinSystem(render.screen)
 st = StarSystem(render.alpha, 60, FMinMax(.7, 1), FMinMax(1, 3), FMinMax(.1, 2), ["#f2dfaa", "#ddb1f0", "#c3c2f2", "#f2b8c1", "#b5f2f7", "#ffffff", "#ffffff", "#ffffff", "#ffffff"])
 
-rocket_image = img_scaler(pygame.image.load("./rocket.png"), .06)
-spaceship_image = img_scaler(pygame.image.load("./spaceship.png"), .06)
+rocket_image = img_scaler(pygame.image.load(absolute_path("./rocket.png")), .06)
+# spaceship_image = img_scaler(pygame.image.load(absolute_path("./spaceship.png")), .06)
 player = Rocket(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, rocket_image, ps)
 
 cs.set_agents([player])
@@ -47,7 +47,7 @@ def get_inputs(rocket: Entity, next_coin: Coin) -> list[float]:
 
     direction_norm = next_coin.pos - rocket.pos
     direction_norm = direction_norm.normalize()
-
+ 
     return [
         rocket.pos.x / SCREEN_WIDTH,
         rocket.pos.y / SCREEN_HEIGHT,
@@ -60,7 +60,7 @@ def get_inputs(rocket: Entity, next_coin: Coin) -> list[float]:
     ]
 
 
-genome = load_genome("best_genome_slow")
+genome = load_genome("best_genome_9")
 spaceman = SpaceMan(player, genome)
 
 while exit_events():

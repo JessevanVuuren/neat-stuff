@@ -23,13 +23,14 @@ class Genome:
         self.fitness = 0.0
         self.adjusted_fitness = 0.0
 
+        node_key = 0
         for _ in range(self.inputs):
-            key = self.get_new_node_key()
-            self.nodes[key] = Node(key, 0)
+            self.nodes[node_key] = Node(node_key, 0)
+            node_key+= 1
 
         for _ in range(self.outputs):
-            key = self.get_new_node_key()
-            self.nodes[key] = Node(key, 1)
+            self.nodes[node_key] = Node(node_key, 1)
+            node_key+= 1
 
     def clone(self):
         clone = Genome(self.genome_history)
@@ -99,12 +100,14 @@ class Genome:
         self.cache_sorted_nodes()
 
     def add_gene(self):
-        n1 = random.choice(list(self.nodes.values()))
-        n2 = random.choice(list(self.nodes.values()))
+        values = list(self.nodes.values())
+
+        n1 = random.choice(values)
+        n2 = random.choice(values)
 
         while n1.layer == n2.layer or (n2.layer == 0):
-            n1 = random.choice(list(self.nodes.values()))
-            n2 = random.choice(list(self.nodes.values()))
+            n1 = random.choice(values)
+            n2 = random.choice(values)
 
         self.connect_nodes(n1, n2)
 
@@ -177,15 +180,14 @@ class Genome:
         return innovation in self.genes
 
     def get_new_node_key(self):
-        return max(list(self.nodes), default=-1) + 1
-        # if self.node_indexer is None:
-        #     self.node_indexer = count(max(self.nodes.keys(), default=-1) + 1)
+        if self.node_indexer is None:
+            self.node_indexer = count(max(self.nodes.keys(), default=-1) + 1)
 
-        # while True:
-        #     new_id = next(self.node_indexer)
-        #     if new_id not in self.nodes:
-        #         return new_id
+        key = next(self.node_indexer)
 
+        assert key not in self.nodes
+
+        return key
 
 
     def connect_genes(self):
@@ -207,9 +209,6 @@ class Genome:
         for node in self.nodes.values():
             node.output = 0
             node.calculated = False
-
-        print([x.layer for x in self.nodes.values() if x.layer == 0])
-        print(len([x.layer for x in self.nodes.values() if x.layer == 0]))
 
         for i in range(self.inputs):
             self.nodes[i].output = inputs[i]

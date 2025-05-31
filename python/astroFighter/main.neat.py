@@ -8,6 +8,7 @@ from neat_ref import *
 from globals import *
 from utils import *
 from coin import *
+import time
 
 import pygame
 import math
@@ -16,7 +17,7 @@ import math
 def game_events():
     for event in pygame.event.get():
         if (event.type == pygame.QUIT):
-            return False
+            pygame.quit()
 
         if (event.type == pygame.KEYDOWN):
             if (event.key == pygame.K_s):
@@ -35,9 +36,9 @@ cs = CoinSystem(render.screen)
 st = StarSystem(render.alpha, 60, FMinMax(.7, 1), FMinMax(1, 3), FMinMax(.1, 2), ["#f2dfaa", "#ddb1f0", "#c3c2f2", "#f2b8c1", "#b5f2f7", "#ffffff", "#ffffff", "#ffffff", "#ffffff"])
 
 genome_history = GenomeHistory(8, 3)
-pop = Population(genome_history, 100)
+pop = PopulationSpecies(genome_history, 100)
 
-rocket_image = img_scaler(pygame.image.load("./rocket.png"), .06)
+rocket_image = img_scaler(pygame.image.load(absolute_path("./rocket.png")), .06)
 
 DIAGONAL = math.sqrt(SCREEN_WIDTH * SCREEN_WIDTH + SCREEN_HEIGHT + SCREEN_HEIGHT)
 
@@ -76,6 +77,8 @@ def eval(genomes: list[Genome]):
 
     cs.set_agents([x.player for x in spaceman])
 
+    start = time.perf_counter()
+
     while len(spaceman) > 0 and game_events() and elapsed_time < 1000:
         elapsed_time += 1
 
@@ -107,6 +110,8 @@ def eval(genomes: list[Genome]):
         delta_time = play_time / 1000
         render.display()
 
+    print(time.perf_counter() - start)
+
     for rocket in spaceman:
         rocket.brain.fitness -= rocket.player.idle_time * .1
 
@@ -115,6 +120,6 @@ def eval(genomes: list[Genome]):
     # print(woow)
 
 
-pop.run(eval, report=True)
+pop.run(eval)
 
 pygame.quit()

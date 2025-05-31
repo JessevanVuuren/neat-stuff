@@ -4,6 +4,7 @@ from .species import *
 from .genome import *
 
 import random
+import time
 
 
 class PopulationSpecies:
@@ -104,28 +105,42 @@ class PopulationSpecies:
 
         self.population = new_pop[:self.pop_size]
 
-    def run(self, fitness_function: Callable[[list[Genome]], None], n: int = 0):
+    def run(self, fitness_function: Callable[[list[Genome]], None], n: int = 0, report: bool = False):
 
         while self.generation < n or n == 0:
+            start_sim = time.perf_counter()
             fitness_function(self.population)
+            stop_sim = time.perf_counter()
 
             self.best_local = max(self.population, key=lambda g: g.fitness).clone()
             if self.best_local.fitness > self.best_global.fitness:
                 self.best_global = self.best_local.clone()
 
-            print(f"\n=== Generation {self.generation} ===")
-            print(f"Best Local Fitness: {self.best_local.fitness:.3f}")
-            print(f"Best Global Fitness: {self.best_global.fitness:.3f}")
-            print(f"Compatibility Threshold: {self.compatibility_threshold:.2f}")
-            print(f"Number of Species: {len(self.species)}")
-
-            stale = [sp.staleness for sp in self.species]
-            stale.sort(reverse=True)
-            print(f"Staleness: {stale}")
-
-            species_sizes = [len(sp.members) for sp in self.species]
-            species_sizes.sort(reverse=True)
-            print(f"Species Sizes: {species_sizes}")
-            print()
-
+            start_reset = time.perf_counter()
             self.reset()
+            stop_reset = time.perf_counter()
+
+            if (report):
+                sim_time = stop_sim - start_sim
+                reset_time = stop_reset - start_reset
+                self.report(reset_time, sim_time)
+
+    def report(self, reset_time: float, sim_time:float):
+        print(f"=== [Species Generation: {self.generation}] ===")
+        print(f"Reset time: {reset_time:.4f}ms")
+        print(f"ium time: {sim_time:.4f}ms")
+        print(f"Local Fitness: {self.best_local.fitness:.6f}")
+        print(f"Global Fitness: {self.best_global.fitness:.6f}")
+        print(f"Genes history: {len(self.gh.all_genes)}")
+        print(f"Compatibility Threshold: {self.compatibility_threshold:.2f}")
+        print(f"Number of Species: {len(self.species)}")
+
+        stale = [sp.staleness for sp in self.species]
+        stale.sort(reverse=True)
+        print(f"Staleness: {stale}")
+
+        species_sizes = [len(sp.members) for sp in self.species]
+        species_sizes.sort(reverse=True)
+        print(f"Species Sizes: {species_sizes}")
+        self.best_global.info()
+        print()
