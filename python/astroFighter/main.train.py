@@ -22,7 +22,7 @@ def game_events():
 
         if (event.type == pygame.KEYDOWN):
             if (event.key == pygame.K_s):
-                save_genome(pop.best_global, "best_genome")
+                save_genome(pop.best_global, "genomes/best_genome")
                 print("Global best genome: \"best_genome\" saved")
 
 render = Render(SCREEN_WIDTH, SCREEN_HEIGHT, "Iosevka")
@@ -89,6 +89,6 @@ def eval(genomes: list[Genome]):
     for rocket in spaceman:
         rocket.brain.fitness -= rocket.player.idle_time * .1
 
-pop.run(eval, report=True)
+pop.run(eval, report=True, fitness=9, save_on_done=True)
 
 pygame.quit()

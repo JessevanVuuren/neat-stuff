@@ -1,10 +1,8 @@
 from __future__ import annotations
 
 from particles import ParticleSystem, StarSystem
-# from spaceship import Spaceship
-from rocket import Rocket
 from renderer import Render
-# from rocket import Rocket
+from rocket import Rocket
 from game_types import *
 from globals import *
 from utils import *
@@ -21,39 +19,54 @@ def exit_events():
     return True
 
 
+def get_inputs() -> list[bool]:
+    keys = pygame.key.get_pressed()
+    return [keys[pygame.K_w],keys[pygame.K_a],keys[pygame.K_d]]
+
 clock = pygame.time.Clock()
 
-running = True
 delta_time = 0.0
 
 render = Render(SCREEN_WIDTH, SCREEN_HEIGHT, "Iosevka")
 
-ps = ParticleSystem(render.screen)
+ps = ParticleSystem()
 cs = CoinSystem(render.screen)
-st = StarSystem(render.alpha, 60, FMinMax(.5, 1), FMinMax(1, 3), FMinMax(.1, 2), ["#f2dfaa", "#ddb1f0", "#c3c2f2", "#f2b8c1", "#b5f2f7", "#ffffff", "#ffffff", "#ffffff", "#ffffff"])
+st = StarSystem(60, FMinMax(.5, 1), FMinMax(1, 3), FMinMax(.1, 2), ["#f2dfaa", "#ddb1f0", "#c3c2f2", "#f2b8c1", "#b5f2f7", "#ffffff", "#ffffff", "#ffffff", "#ffffff"])
+
 
 rocket_image = img_scaler(pygame.image.load(absolute_path("./rocket.png")), .06)
-# spaceship_image = img_scaler(pygame.image.load(absolute_path("./spaceShip.png")), .06)
-player = Rocket(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, rocket_image, ps)
-# player = Spaceship(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, spaceship_image, ps)
+position = Vec2(SCREEN_WIDTH/2, SCREEN_HEIGHT/2)
+size = tuple_2_vec2(rocket_image.get_size())
 
-cs.set_agents([player])
+player = Rocket(position, size, ps, False)
+graphics = Graphic(rocket_image, player)
+graphics.angle_offset = -90
 
-score = 0.0
+gameObject = GameObject(player, graphics)
+
+
+cs.set_entitys([gameObject.player])
+
 while exit_events():
 
     render.fill("#000000")
 
-    player.update(delta_time)
+    print(delta_time)
+    player.update(get_inputs(), delta_time)
 
     ps.update(delta_time)
     cs.update(player)
     st.update(delta_time)
 
-    render.surface(player.graphic)
+    render.surface(gameObject.graphics)
+    render.particles(ps.particles)
+    render.particles(st.stars, True)
+    render.particles(list(cs.coins.values()))
+
     cs.draw()
 
-    score = player.coins + 1 - player.pos.distance_to(cs.coins[player.id].pos) / 1468
+
+    score = player.coins + 1 - player.pos.distance(cs.coins[player.id].pos) / 1468
 
     render.text("Score: " + str(score), 10, 30)
     render.text("FPS: " + str(clock.get_fps()), 10, 10)

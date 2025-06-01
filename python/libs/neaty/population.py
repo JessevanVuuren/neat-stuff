@@ -3,6 +3,7 @@ from __future__ import annotations
 from .genome_history import GenomeHistory
 from collections.abc import Callable
 from .genome import Genome
+from .manager import *
 
 import random
 import time
@@ -45,10 +46,9 @@ class Population:
         self.population[1] = parents[0].clone()
         self.population[2] = parents[1].clone()
 
-    def run(self, fitness_function: Callable[[list[Genome]], None], n: int = 0, report: bool = False):
+    def run(self, fitness_function: Callable[[list[Genome]], None], n: int = 0, report: bool = False, fitness:float|None = None, save_on_done:bool = False):
 
         while self.generation < n or n == 0:
-
             start_sim = time.perf_counter()
             fitness_function(self.population)
             stop_sim = time.perf_counter()
@@ -69,6 +69,13 @@ class Population:
                 sim_time = stop_sim - start_sim
                 reset_time = stop_reset - start_reset
                 self.report(reset_time, sim_time)
+
+            if (fitness and self.best_global.fitness >= fitness):
+                break
+
+        if save_on_done:
+            fit_name = f"{self.best_global.fitness:.4f}".replace(".", "-")
+            save_genome(self.best_global, f"genomes/genome_gen_fit_{fit_name}")
 
     def report(self, reset_time: float, sim_time:float):
         print(f"=== [Generation: {self.generation}] ===")

@@ -4,7 +4,7 @@ from game_types import *
 from globals import *
 
 import pygame
-
+from utils import vec2_2_vector2
 
 class Render:
     def __init__(self, width: int, height: int, typeface: str = "", font_size: int = 30) -> None:
@@ -46,8 +46,23 @@ class Render:
         else:
             self.screen.fill(color)
 
+    @staticmethod
+    def circle(color:str, pos:Vec2, size:float, screen:Surface):
+        pygame.draw.circle(screen, color, vec2_2_vector2(pos), size)
+        
+    def particles(self, particles:list[Particle], alpha:bool=False):
+        for particle in particles:
+            if (not particle.alive):
+                continue
+            
+            screen = self.screen if not alpha else self.alpha
+            self.circle(particle.color, particle.pos, particle.size, screen)
+            
+            
     def surface(self, graph: Graphic):
-        self.screen.blit(graph.surface, graph.anchor_point)
+        surface = pygame.transform.rotate(graph.surface, -graph.entity.angle + graph.angle_offset)
+        rect = surface.get_rect(center=vec2_2_vector2(graph.entity.center()))
+        self.screen.blit(surface, rect.topleft)
 
     def display(self):
         self.screen.blit(self.alpha, (0, 0))

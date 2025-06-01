@@ -6,25 +6,20 @@ from globals import *
 from utils import *
 from coin import *
 
-import pygame
 import math
 
 
 class Rocket(Entity):
 
-    def __init__(self, x: float, y: float, image: pygame.Surface, ps: ParticleSystem, training_mode:bool=False):
-        Entity.__init__(self, pygame.Vector2(x, y), image.get_rect().w, image.get_rect().h, 0)
+    def __init__(self, pos:Vec2, size:Vec2, ps:ParticleSystem, training_mode:bool = True):
+        Entity.__init__(self, pos, size.x, size.y, 0)
         self.training_mode = training_mode
-        self.idle_time = 0.0
+        self.ps = ps
 
         self.velocity = 0
         self.coins = 0
-        self.ps = ps
-
+    
         self.smoke_trail = 10
-
-        self.graphic = Graphic(image, self.pos)
-        self.image = image
 
         self.smokeRange = gradient_color("white", "#181818", 60)
         self.exhaustRange = gradient_color("red", "yellow", 60)
@@ -33,58 +28,24 @@ class Rocket(Entity):
         self.right_thrust_pos = Vector2(-25, 31.4)
         self.middle_thrust_pos = Vector2(-25, 0)
 
-    def update(self, delta_time: float):
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_w]:
-            self.thrust_effect(self.middle_thrust_pos)
-            self.velocity = min(self.velocity + ACCELERATION, MAX_VELOCITY)
-        elif (self.velocity > 0):
-            self.velocity = self.velocity * math.pow((1 - BRAKE_FORCE), delta_time)
-        else:
-            self.velocity = 0
-
-        if keys[pygame.K_a]:
-            self.thrust_effect(self.right_thrust_pos)
-            self.angle -= ROTATION_VELOCITY * delta_time
-        if keys[pygame.K_d]:
-            self.thrust_effect(self.left_thrust_pos)
-            self.angle += ROTATION_VELOCITY * delta_time
-
-        self.update_graphic()
-        self.move(delta_time)
+    def update(self, inputs:list[bool], delta_time: float):
+        self.move(inputs[0], inputs[1], inputs[2], delta_time)
         self.wrap()
 
-    def update_neat(self, delta_time: float, inputs: list[float]):
-        self.idle_time += delta_time
-    
-        if inputs[0] > 0.5:
-            self.idle_time = 0.0
-            self.thrust_effect(self.middle_thrust_pos)
-            self.velocity = min(self.velocity + ACCELERATION * delta_time, MAX_VELOCITY)
+    def move(self, forward:bool, right:bool, left:bool, delta_time:float):
+            
+        if forward:
+            self.forward(delta_time)
         elif self.velocity > 0:
-            self.velocity *= math.pow((1 - BRAKE_FORCE), delta_time)
+            self.brake(delta_time)
         else:
             self.velocity = 0
 
-        if inputs[1] > 0.5:
-            self.thrust_effect(self.right_thrust_pos)
-            self.angle -= ROTATION_VELOCITY * delta_time
-        if inputs[2] > 0.5:
-            self.thrust_effect(self.left_thrust_pos)
-            self.angle += ROTATION_VELOCITY * delta_time
+        if right:
+            self.turn_right(delta_time)
+        if left:
+            self.turn_left(delta_time)
 
-        self.update_graphic()
-        self.move(delta_time)
-        self.wrap()
-
-    def thrust_effect(self, pos: Vector2):
-        if self.training_mode:
-            return
-        x, y = pos
-        self.ps.add_particle(ParticleExhaust(self, x, y, 3, .1, self.exhaustRange, 4, 30))
-        self.ps.add_particle(ParticleSmoke(self, x - 39, y * 1.2, 4, 1, self.smokeRange, 15))
-
-    def move(self, delta_time:float):
         radians = math.radians(self.angle)
         vertical = math.cos(radians) * self.velocity * delta_time
         horizontal = math.sin(radians) * self.velocity * delta_time
@@ -92,7 +53,27 @@ class Rocket(Entity):
         self.pos.x += vertical
         self.pos.y += horizontal
 
-    def update_graphic(self):
-        self.graphic.surface = pygame.transform.rotate(self.image, -self.angle - 90)
-        rect = self.graphic.surface.get_rect(center=self.image.get_rect(topleft=(self.pos.x, self.pos.y)).center)
-        self.graphic.anchor_point = tuple_2_vec2(rect.topleft)
+    def brake(self, delta_time:float):
+        self.velocity *= math.pow((1 - BRAKE_FORCE), delta_time)
+
+    def forward(self, delta_time:float):
+        self.thrust_effect(self.middle_thrust_pos)
+        self.velocity = min(self.velocity + ACCELERATION * delta_time, MAX_VELOCITY)
+
+    def turn_left(self, delta_time:float):
+        self.thrust_effect(self.left_thrust_pos)
+        self.angle += ROTATION_VELOCITY * delta_time
+
+    def turn_right(self, delta_time:float):
+        self.thrust_effect(self.right_thrust_pos)
+        self.angle -= ROTATION_VELOCITY * delta_time
+
+    def thrust_effect(self, pos: Vector2):
+        if self.training_mode:
+            return
+
+        exhaust = ParticleExhaust(self, pos.x, pos.y, 3, .1, self.exhaustRange, 4, 30)        
+        smoke = ParticleSmoke(self, pos.x - 39, pos.y * 1.2, 4, 1, self.smokeRange, 15)
+
+        self.ps.add_particle(exhaust)
+        self.ps.add_particle(smoke)

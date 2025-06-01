@@ -1,28 +1,26 @@
+from random import randint
 from game_types import *
-import pygame
 
 
-class Coin(Entity):
-    def __init__(self, pos: Vector2, width: float, height: float, color: str):
-        Entity.__init__(self, pos, width, height, 0)
-        self.color = color
-        self.timer = 0
+class Coin(Particle):
+    def __init__(self, pos: Vec2, size: float, color: str):
+        super().__init__(pos, size, 0, color) 
 
-    def update(self, delta_time: float):
+    def update(self, dt: float):
         pass
 
     def draw(self, surface: Surface):
-        pygame.draw.circle(surface, self.color, self.pos, self.height/2)
+        pass
 
 
 class CoinSystem:
     def __init__(self, screen: Surface) -> None:
         self.coins: dict[str, Coin] = {}
-        self.agents: list[Entity] = []
+        self.entitys: list[Entity] = []
         self.screen = screen
 
-    def set_agents(self, agents: list[Entity]):
-        self.agents = agents
+    def set_entitys(self, entitys: list[Entity]):
+        self.entitys = entitys
         self.reset_coins()
         self.init_coins()
 
@@ -30,18 +28,17 @@ class CoinSystem:
         self.coins = {}
 
     def init_coins(self):
-        for agent in self.agents:
+        for agent in self.entitys:
             self.spawn_coin(agent)
 
     def spawn_coin(self, agent: Entity):
-        x = random.randint(10, SCREEN_WIDTH - 10)
-        y = random.randint(10, SCREEN_HEIGHT - 10)
+        x = randint(10, SCREEN_WIDTH - 10)
+        y = randint(10, SCREEN_HEIGHT - 10)
 
-        pos = Vector2(x, y)
-        self.coins[agent.id] = Coin(pos, 10, 10, "#FFDD33")
+        self.coins[agent.id] = Coin(Vec2(x, y), 5, "#FFDD33")
 
     def update(self, agent: Entity):
-        if (self.coins[agent.id].get_rect().colliderect(agent.get_rect())):
+        if (self.coins[agent.id].get_square().overlap(agent.get_square())):
             agent.coins += 1
 
             self.spawn_coin(agent)

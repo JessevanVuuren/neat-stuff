@@ -1,20 +1,62 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
 
-from pygame import Surface, Vector2, Rect
-from dataclasses import dataclass
+from pygame import Surface
+from dataclasses import dataclass, field
 from neat_ref import *
 from globals import *
-from utils import *
 
 import math
 import uuid
 
+@dataclass
+class Vec2:
+    x:float
+    y:float
+
+    def distance(self, v:Vec2):
+        d = math.pow(v.x - self.x, 2) + math.pow(v.y - self.y, 2)
+        return math.sqrt(d)
+    
+    def __sub__(self, v:Vec2):
+        return Vec2(self.x - v.x, self.y - v.y)
+
+    def _magnitude(self):
+        return self.x * self.x + self.y * self.y
+
+    def norm(self):
+        length = math.sqrt(self._magnitude())
+        return Vec2(self.x/length, self.y/length)
+
+
+@dataclass
+class Square:
+    x:float
+    y:float
+    w:float
+    h:float
+
+    def overlap(self, b: Square) -> bool:
+        
+        if self.x + self.w <= b.x or b.x + b.w <= self.x:
+            return False
+        
+        if self.y + self.h <= b.y or b.y + b.h <= self.y:
+            return False
+        
+        return True
+
+@dataclass
+class GameObject:
+    player:Entity
+    graphics:Graphic
 
 @dataclass
 class Graphic:
     surface: Surface
-    anchor_point: Vector2
+    entity: Entity
+    angle_offset:float = 0.0
+    pos_offset:Vec2 = field(default_factory=lambda: Vec2(0,0))
 
 
 @dataclass
@@ -30,15 +72,14 @@ class FMinMax:
 class IMinMax:
     min: int
     max: int
-
-
+        
 class Entity(ABC):
     @property
     def angle(self) -> float:
         return self._angle
 
     @property
-    def pos(self) -> Vector2:
+    def pos(self) -> Vec2:
         return self._pos
 
     @property
@@ -50,7 +91,7 @@ class Entity(ABC):
         return self._height
 
     @pos.setter
-    def pos(self, vec: Vector2):
+    def pos(self, vec: Vec2):
         self._pos = vec
 
     @angle.setter
@@ -69,7 +110,7 @@ class Entity(ABC):
     def id(self) -> str:
         return str(self._id)
 
-    def __init__(self, pos: Vector2, width: float, height: float, angle: float):
+    def __init__(self, pos: Vec2, width: float, height: float, angle: float):
         self._pos = pos
         self._width = width
         self._height = height
@@ -77,17 +118,16 @@ class Entity(ABC):
         self._coins = 0
         self._id = uuid.uuid4()
 
-
     def set_xy(self, x: float, y: float):
-        self.pos = Vector2(x, y)
+        self.pos = Vec2(x, y)
 
     @abstractmethod
-    def update(self, delta_time: float): ...
+    def update(self, inputs:list[bool], delta_time: float): ...
 
     def center(self):
         center_x = self.pos.x + self._width / 2
         center_y = self.pos.y + self._height / 2
-        return Vector2(center_x, center_y)
+        return Vec2(center_x, center_y)
 
     def rotate_from_origin(self, x_offset: float, y_offset: float):
         angle_radians = math.radians(self._angle)
@@ -104,7 +144,7 @@ class Entity(ABC):
         new_x1 = (new_point_x - origin_x) * cos - (new_point_y - origin_y) * sin + origin_x
         new_y1 = (new_point_x - origin_x) * sin + (new_point_y - origin_y) * cos + origin_y
 
-        return Vector2(new_x1, new_y1)
+        return Vec2(new_x1, new_y1)
 
     def rotate(self, delta_angle: float):
         self._angle += delta_angle
@@ -112,15 +152,34 @@ class Entity(ABC):
     def set_rotation(self, angle: float):
         self._angle = angle
 
-    def get_rect(self) -> Rect:
-        return Rect(self._pos.x, self._pos.y, self._width, self._height)
+    def get_square(self) -> Square:
+        return Square(self._pos.x, self._pos.y, self._width, self._height)
 
     def wrap(self):
         if (self.pos.x > SCREEN_WIDTH):
-            self.pos = Vector2(-self.width, self.pos.y)
+            self.pos = Vec2(-self.width, self.pos.y)
         if (self.pos.y > SCREEN_HEIGHT):
-            self.pos = Vector2(self.pos.x, -self.height)
+            self.pos = Vec2(self.pos.x, -self.height)
         if (self.pos.x < -self.width):
-            self.pos = Vector2(SCREEN_WIDTH, self.pos.y)
+            self.pos = Vec2(SCREEN_WIDTH, self.pos.y)
         if (self.pos.y < -self.height):
-            self.pos = Vector2(self.pos.x, SCREEN_HEIGHT)
+            self.pos = Vec2(self.pos.x, SCREEN_HEIGHT)
+
+class Particle(ABC):
+    def __init__(self, pos: Vec2, size: float, ttl: float, color: str) -> None:
+        self.pos = pos
+
+        self.alive = True
+        self.color = color
+        self.size = size
+        self.ttl = ttl
+
+    @abstractmethod
+    def update(self, dt: float):
+        pass
+
+    def is_alive(self):
+        return self.alive
+
+    def get_square(self):
+        return Square(self.pos.x, self.pos.y, self.size, self.size)
