@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from particles import ParticleSystem
-from renderer import Render
 from rocket import Rocket
 from game_types import *
 from neat_ref import *
@@ -9,44 +8,22 @@ from globals import *
 from utils import *
 from coin import *
 
-import pygame
 import math
 
-
-MAX_DURATION = 10
-
-def game_events():
-    for event in pygame.event.get():
-        if (event.type == pygame.QUIT):
-            pygame.quit()
-
-        if (event.type == pygame.KEYDOWN):
-            if (event.key == pygame.K_s):
-                save_genome(pop.best_global, "genomes/best_genome")
-                print("Global best genome: \"best_genome\" saved")
-
-render = Render(SCREEN_WIDTH, SCREEN_HEIGHT, "Iosevka")
-
-ps = ParticleSystem(render.screen)
-cs = CoinSystem(render.screen)
+ps = ParticleSystem()
+cs = CoinSystem()
 
 genome_history = GenomeHistory(8, 3)
 pop = Population(genome_history, 100)
 
-rocket_image = img_scaler(pygame.image.load(absolute_path("./rocket.png")), .06)
-
-DIAGONAL = math.sqrt(SCREEN_WIDTH * SCREEN_WIDTH + SCREEN_HEIGHT + SCREEN_HEIGHT)
-
-@dataclass
-class SpaceMan:
-    player: Rocket
-    brain: Genome
+start_pos = Vec2(SCREEN_WIDTH/2, SCREEN_HEIGHT/2)
+size = Vec2(x=68, y=46)
 
 
 def get_inputs(rocket: Entity, next_coin: Coin) -> list[float]:
 
     direction_norm = next_coin.pos - rocket.pos
-    direction_norm = direction_norm.normalize()
+    direction_norm = direction_norm.norm()
 
     return [
         rocket.pos.x / SCREEN_WIDTH,
@@ -60,35 +37,50 @@ def get_inputs(rocket: Entity, next_coin: Coin) -> list[float]:
     ]
 
 
+@dataclass
+class TrainMan:
+    player: Entity
+    brain: Genome
+    idle_time = 0.0
+
 def eval(genomes: list[Genome]):
-    spaceman: list[SpaceMan] = []
+    spaceman: list[TrainMan] = []
 
     for genome in genomes:
-        player = Rocket(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, rocket_image, ps, True)
-        spaceman.append(SpaceMan(player, genome))
 
-    cs.set_agents([x.player for x in spaceman])
+        player = Rocket(start_pos, size, ps, True)
+        spaceman.append(TrainMan(player, genome))
+
+    cs.set_entitys([x.player for x in spaceman])
 
     delta_time = 0.1
     elapsed_time = 0
-    while len(spaceman) > 0 and elapsed_time < MAX_DURATION:
+    while elapsed_time < MAX_DURATION:
         elapsed_time += delta_time
-        game_events()
 
-        for _, rocket in enumerate(spaceman):
-            coin = cs.coins[rocket.player.id]
-            distance_coin = 1 - rocket.player.pos.distance_to(coin.pos) / DIAGONAL
-            rocket.brain.fitness = rocket.player.coins + distance_coin
+        for agent in spaceman:
 
-            inputs = get_inputs(rocket.player, coin)
-            outputs = rocket.brain.get_outputs(inputs)
-            rocket.player.update_neat(delta_time, outputs)
+            player = agent.player
+            brain = agent.brain
 
-            cs.update(rocket.player)
+            coin = cs.coins[player.id]
+            distance_coin = 1 - player.pos.distance(coin.pos) / 1468
+            brain.fitness = player.coins + distance_coin
+            agent.idle_time += 0.008
 
+            inputs = get_inputs(player, coin)
+            outputs = brain.get_outputs(inputs)
+            move_actions = [x > .5 for x in outputs]
+            player.update(move_actions, delta_time)
+
+            if move_actions[0]:
+                agent.idle_time = 0
+
+            cs.update(player)
+
+    
     for rocket in spaceman:
-        rocket.brain.fitness -= rocket.player.idle_time * .1
+        rocket.brain.fitness -= rocket.idle_time * .1
 
+# pop.run(eval, report=True)
 pop.run(eval, report=True, fitness=9, save_on_done=True)
-
-pygame.quit()

@@ -56,7 +56,7 @@ class Render:
                 continue
             
             screen = self.screen if not alpha else self.alpha
-            self.circle(particle.color, particle.pos, particle.size, screen)
+            Render.circle(particle.color, particle.pos, particle.size, screen)
             
             
     def surface(self, graph: Graphic):

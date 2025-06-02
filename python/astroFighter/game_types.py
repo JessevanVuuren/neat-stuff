@@ -2,23 +2,24 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 
 from pygame import Surface
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from neat_ref import *
 from globals import *
 
 import math
 import uuid
 
+
 @dataclass
 class Vec2:
-    x:float
-    y:float
+    x: float
+    y: float
 
-    def distance(self, v:Vec2):
+    def distance(self, v: Vec2):
         d = math.pow(v.x - self.x, 2) + math.pow(v.y - self.y, 2)
         return math.sqrt(d)
-    
-    def __sub__(self, v:Vec2):
+
+    def __sub__(self, v: Vec2):
         return Vec2(self.x - v.x, self.y - v.y)
 
     def _magnitude(self):
@@ -30,33 +31,48 @@ class Vec2:
 
 
 @dataclass
+class SpaceMan:
+    gameobject: GameObject
+    brain: Genome
+    idle_time = 0.0
+
+    def extract(self) -> tuple[Entity, Graphic, Genome]:
+        return (
+            self.gameobject.player,
+            self.gameobject.graphics,
+            self.brain
+        )
+
+
+@dataclass
 class Square:
-    x:float
-    y:float
-    w:float
-    h:float
+    x: float
+    y: float
+    w: float
+    h: float
 
     def overlap(self, b: Square) -> bool:
-        
+
         if self.x + self.w <= b.x or b.x + b.w <= self.x:
             return False
-        
+
         if self.y + self.h <= b.y or b.y + b.h <= self.y:
             return False
-        
+
         return True
+
 
 @dataclass
 class GameObject:
-    player:Entity
-    graphics:Graphic
+    player: Entity
+    graphics: Graphic
+
 
 @dataclass
 class Graphic:
     surface: Surface
     entity: Entity
-    angle_offset:float = 0.0
-    pos_offset:Vec2 = field(default_factory=lambda: Vec2(0,0))
+    angle_offset: float = 0.0
 
 
 @dataclass
@@ -72,7 +88,8 @@ class FMinMax:
 class IMinMax:
     min: int
     max: int
-        
+
+
 class Entity(ABC):
     @property
     def angle(self) -> float:
@@ -122,7 +139,7 @@ class Entity(ABC):
         self.pos = Vec2(x, y)
 
     @abstractmethod
-    def update(self, inputs:list[bool], delta_time: float): ...
+    def update(self, inputs: list[bool], delta_time: float): ...
 
     def center(self):
         center_x = self.pos.x + self._width / 2
@@ -164,6 +181,7 @@ class Entity(ABC):
             self.pos = Vec2(SCREEN_WIDTH, self.pos.y)
         if (self.pos.y < -self.height):
             self.pos = Vec2(self.pos.x, SCREEN_HEIGHT)
+
 
 class Particle(ABC):
     def __init__(self, pos: Vec2, size: float, ttl: float, color: str) -> None:

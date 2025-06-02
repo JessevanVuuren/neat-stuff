@@ -14,10 +14,9 @@ class Coin(Particle):
 
 
 class CoinSystem:
-    def __init__(self, screen: Surface) -> None:
+    def __init__(self) -> None:
         self.coins: dict[str, Coin] = {}
         self.entitys: list[Entity] = []
-        self.screen = screen
 
     def set_entitys(self, entitys: list[Entity]):
         self.entitys = entitys
@@ -42,7 +41,3 @@ class CoinSystem:
             agent.coins += 1
 
             self.spawn_coin(agent)
-
-    def draw(self):
-        for coin in self.coins.values():
-            coin.draw(self.screen)

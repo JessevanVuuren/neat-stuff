@@ -30,8 +30,8 @@ delta_time = 0.0
 render = Render(SCREEN_WIDTH, SCREEN_HEIGHT, "Iosevka")
 
 ps = ParticleSystem()
-cs = CoinSystem(render.screen)
-st = StarSystem(60, FMinMax(.5, 1), FMinMax(1, 3), FMinMax(.1, 2), ["#f2dfaa", "#ddb1f0", "#c3c2f2", "#f2b8c1", "#b5f2f7", "#ffffff", "#ffffff", "#ffffff", "#ffffff"])
+cs = CoinSystem()
+st = StarSystem(60, FMinMax(.5, 1), FMinMax(1, 3), FMinMax(.1, 2), STAR_COLORS)
 
 
 rocket_image = img_scaler(pygame.image.load(absolute_path("./rocket.png")), .06)
@@ -62,9 +62,6 @@ while exit_events():
     render.particles(ps.particles)
     render.particles(st.stars, True)
     render.particles(list(cs.coins.values()))
-
-    cs.draw()
-
 
     score = player.coins + 1 - player.pos.distance(cs.coins[player.id].pos) / 1468
 

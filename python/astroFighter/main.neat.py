@@ -16,7 +16,7 @@ import math
 render = Render(SCREEN_WIDTH, SCREEN_HEIGHT, "Iosevka")
 
 ps = ParticleSystem()
-cs = CoinSystem(render.screen)
+cs = CoinSystem()
 st = StarSystem(60, FMinMax(.7, 1), FMinMax(1, 3), FMinMax(.1, 2), ["#f2dfaa", "#ddb1f0", "#c3c2f2", "#f2b8c1", "#b5f2f7", "#ffffff", "#ffffff", "#ffffff", "#ffffff"])
 
 genome_history = GenomeHistory(8, 3)
@@ -25,12 +25,6 @@ pop = Population(genome_history, 100)
 rocket_image = img_scaler(pygame.image.load(absolute_path("./rocket.png")), .06)
 start_pos = Vec2(SCREEN_WIDTH/2, SCREEN_HEIGHT/2)
 size = tuple_2_vec2(rocket_image.get_size())
-
-@dataclass
-class SpaceMan:
-    gameobject: GameObject
-    brain: Genome
-    idle_time = 0.0
 
 
 def get_inputs(rocket: Entity, next_coin: Coin) -> list[float]:
@@ -76,9 +70,9 @@ def eval(genomes: list[Genome]):
 
     delta_time = 0
     elapsed_time = 0
-    while len(spaceman) > 0 and elapsed_time < 1000:
+    while elapsed_time < MAX_DURATION:
+        elapsed_time += delta_time
         game_events()
-        elapsed_time += 1
 
         render.fill("#000000")
 
@@ -110,10 +104,10 @@ def eval(genomes: list[Genome]):
         render.particles(st.stars, True)
         render.particles(list(cs.coins.values()))
 
-        render.text("FPS: " + str(clock.get_fps()), 10, 10)
-        render.text("Particles: " + str(len(ps.particles)), 10, 35)
-        render.text("Generation: " + str(pop.generation), 10, 60)
-        render.text("Reset: " + str(1000 - elapsed_time), 10, 85)
+        render.text(f"FPS: {str(clock.get_fps())}", 10, 10)
+        render.text(f"Particles: {len(ps.particles)}", 10, 35)
+        render.text(f"Generation: {pop.generation}", 10, 60)
+        render.text(f"Reset: {MAX_DURATION - elapsed_time}", 10, 85)
 
         delta_time = clock.tick(FPS) / 1000
         render.display()
@@ -121,6 +115,7 @@ def eval(genomes: list[Genome]):
     for rocket in spaceman:
         rocket.brain.fitness -= rocket.idle_time * .1
 
+
 clock = pygame.time.Clock()
-pop.run(eval, report=True)
+pop.run(eval, report=True, fitness=9, save_on_done=True)
 pygame.quit()
