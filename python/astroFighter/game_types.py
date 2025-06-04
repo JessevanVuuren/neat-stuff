@@ -22,12 +22,17 @@ class Vec2:
     def __sub__(self, v: Vec2):
         return Vec2(self.x - v.x, self.y - v.y)
 
-    def _magnitude(self):
+    def _magnitude_squared(self):
         return self.x * self.x + self.y * self.y
 
+    def copy(self):
+        return Vec2(self.x, self.y)
+
     def norm(self):
-        length = math.sqrt(self._magnitude())
-        return Vec2(self.x/length, self.y/length)
+        length = math.sqrt(self._magnitude_squared())
+        if length == 0:
+            return Vec2(0, 0)
+        return Vec2(self.x / length, self.y / length)
 
 
 @dataclass

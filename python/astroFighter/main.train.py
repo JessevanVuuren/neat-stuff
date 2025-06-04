@@ -44,11 +44,12 @@ class TrainMan:
     idle_time = 0.0
 
 def eval(genomes: list[Genome]):
+    print("eval_start")
     spaceman: list[TrainMan] = []
 
     for genome in genomes:
 
-        player = Rocket(start_pos, size, ps, True)
+        player = Rocket(start_pos.copy(), size.copy(), ps, True)
         spaceman.append(TrainMan(player, genome))
 
     cs.set_entitys([x.player for x in spaceman])
@@ -81,6 +82,8 @@ def eval(genomes: list[Genome]):
     
     for rocket in spaceman:
         rocket.brain.fitness -= rocket.idle_time * .1
+
+    
 
 # pop.run(eval, report=True)
 pop.run(eval, report=True, fitness=9, save_on_done=True)

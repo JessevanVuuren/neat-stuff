@@ -60,7 +60,7 @@ def eval(genomes: list[Genome]):
 
     for genome in genomes:
 
-        player = Rocket(start_pos, size, ps, True)
+        player = Rocket(start_pos.copy(), size.copy(), ps, True)
         graphics = Graphic(rocket_image, player, -90)
 
         gameObject = GameObject(player, graphics)
@@ -107,7 +107,7 @@ def eval(genomes: list[Genome]):
         render.text(f"FPS: {str(clock.get_fps())}", 10, 10)
         render.text(f"Particles: {len(ps.particles)}", 10, 35)
         render.text(f"Generation: {pop.generation}", 10, 60)
-        render.text(f"Reset: {MAX_DURATION - elapsed_time}", 10, 85)
+        render.text(f"Reset: {MAX_DURATION - elapsed_time:.04f}", 10, 85)
 
         delta_time = clock.tick(FPS) / 1000
         render.display()

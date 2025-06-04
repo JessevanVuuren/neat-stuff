@@ -12,5 +12,5 @@ BRAKE_FORCE = .9
 
 MAX_DURATION = 10
 
-DIAGONAL = math.sqrt(SCREEN_WIDTH * SCREEN_WIDTH + SCREEN_HEIGHT + SCREEN_HEIGHT)
+DIAGONAL = math.sqrt(SCREEN_WIDTH * SCREEN_WIDTH + SCREEN_HEIGHT * SCREEN_HEIGHT)
 STAR_COLORS = ["#f2dfaa", "#ddb1f0", "#c3c2f2", "#f2b8c1", "#b5f2f7", "#ffffff", "#ffffff", "#ffffff", "#ffffff"]

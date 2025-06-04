@@ -21,7 +21,6 @@ class Node:
 
         self.bias = self.gaussian_number() * bias_init_stDev + bias_init_mean
 
-
         self.genes: list[Gene] = []
 
     def mutate(self):
@@ -32,10 +31,10 @@ class Node:
                 delta = self.gaussian_number() * bias_mutate_power
                 self.bias += delta
 
-        self.bias = self.clamp(self.bias)
+        self.bias = self.clamp(self.bias, bias_min_value, bias_max_value)
 
-    def clamp(self, number: float):
-        return max(bias_min_value, min(number, bias_max_value))
+    def clamp(self, number: float, min_value: float, max_value: float):
+        return max(min_value, min(number, max_value))
 
     def gaussian_number(self) -> float:
         rand1 = random.random()
@@ -44,6 +43,8 @@ class Node:
         return math.sqrt(-2 * math.log(rand1)) * math.cos(2 * math.pi * rand2)
 
     def sigmoid(self, x: float) -> float:
+        # val = self.clamp(x, -100, 100) * 5.0
+        # return 1 / (1 + math.exp(-val))
         return 1 / (1 + math.exp(-x))
 
     def clone(self):
