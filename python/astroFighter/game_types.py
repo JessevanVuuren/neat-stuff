@@ -1,8 +1,8 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
 
-from pygame import Surface
 from dataclasses import dataclass
+from pygame import Surface
 from neat_ref import *
 from globals import *
 

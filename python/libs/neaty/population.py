@@ -2,30 +2,116 @@ from __future__ import annotations
 
 from .genome_history import GenomeHistory
 from collections.abc import Callable
+from .parallel import MultiEvaluator
+from .config import NeatConfig
+from .profiler import Profiler
 from .genome import Genome
+from .species import *
 from .manager import *
 
 import random
-import time
 
 
 class Population:
-    def __init__(self, gh: GenomeHistory, pop_size: int) -> None:
-
-        self.pop_size = pop_size
-        self.generation = 0
+    def __init__(self, config: NeatConfig, gh: GenomeHistory) -> None:
         self.population: list[Genome] = []
+        self.species: list[Species] = []
+
+        self.config = config
         self.gh = gh
 
+        self.target_species_count = config.target_species
+        self.compatibility_threshold = 3.5
+        self.pop_size = config.pop_size
+
+        self.generation = 0
+        self.global_avg = 0
+
         for _ in range(self.pop_size):
-            genome = Genome(self.gh)
+            genome = Genome(self.config, self.gh)
             genome.mutate()
             self.population.append(genome)
 
         self.best_local = self.population[0]
         self.best_global = self.population[0]
 
-    def reset(self):
+    def speciate(self):
+        for sp in self.species:
+            sp.members.clear()
+            sp.representative = random.choice(sp.members) if sp.members else sp.representative
+
+        for genome in self.population:
+            assigned = False
+            for sp in self.species:
+                if sp.check(genome, self.compatibility_threshold):
+                    sp.add(genome)
+                    assigned = True
+                    break
+            if not assigned:
+                self.species.append(Species(genome))
+
+        self.species = [sp for sp in self.species if len(sp.members) > 0]
+
+    def set_allowed_offspring(self):
+        total_adjusted_fitness = 0.0
+        for sp in self.species:
+            sp.adjusted_fitness()
+            total_adjusted_fitness += sp.get_total_adjusted_fitness()
+
+        self.global_avg = total_adjusted_fitness / self.pop_size
+
+        total_offspring = 0
+        for sp in self.species:
+            if sp.get_total_adjusted_fitness() == 0:
+                sp.allow_offspring = 0
+            else:
+                proportion = sp.get_total_adjusted_fitness() / total_adjusted_fitness
+                sp.allow_offspring = max(1, int(proportion * self.pop_size))
+            total_offspring += sp.allow_offspring
+
+        while total_offspring < self.pop_size:
+            random.choice(self.species).allow_offspring += 1
+            total_offspring += 1
+        while total_offspring > self.pop_size:
+            sp = random.choice(self.species)
+            if sp.allow_offspring > 1:
+                sp.allow_offspring -= 1
+                total_offspring -= 1
+
+    def adjust_compatibility_threshold(self):
+        species_diff = len(self.species) - self.target_species_count
+
+        if abs(species_diff) > 1:
+            self.compatibility_threshold += 0.05 * species_diff
+
+        self.compatibility_threshold = max(0.5, min(self.compatibility_threshold, 15.0))
+
+    def reset_species(self):
+        self.generation += 1
+        self.speciate()
+
+        for sp in self.species:
+            sp.update_staleness()
+
+        self.species = [sp for sp in self.species if sp.staleness < 15 or sp.best_fitness >= self.best_global.fitness]
+
+        self.adjust_compatibility_threshold()
+        self.set_allowed_offspring()
+
+        new_pop: list[Genome] = [self.best_global.clone()]
+
+        for sp in self.species:
+            elite = max(sp.members, key=lambda g: g.fitness)
+            new_pop.append(elite.clone())
+            for _ in range(sp.allow_offspring - 1):
+                new_pop.append(sp.give_random_offspring(self.gh))
+
+        while len(new_pop) < self.pop_size:
+            new_pop.append(Genome(self.config, self.gh))
+
+        self.population = new_pop[:self.pop_size]
+
+    def reset_population(self):
         self.generation += 1
 
         parents = self.population.copy()
@@ -43,46 +129,65 @@ class Population:
             self.population.append(child)
 
         self.population[0] = self.best_global.clone()
-        self.population[1] = parents[0].clone()
-        self.population[2] = parents[1].clone()
+        for i in range(self.config.elitism):
+            if (i + 1 < len(self.population) and i < len(parents)):
+                self.population[i + 1] = parents[i].clone()
 
-    def run(self, fitness_function: Callable[[list[Genome]], None], n: int = 0, report: bool = False, fitness:float|None = None, save_on_done:bool = False):
+    def run(self, fitness_function: Callable[[list[Genome]], list[float]]):
 
-        while self.generation < n or n == 0:
-            start_sim = time.perf_counter()
-            fitness_function(self.population)
-            stop_sim = time.perf_counter()
+        if (self.config.parallel):
+            evaluator = MultiEvaluator(fitness_function, self.config.workers)
+            fitness_function = evaluator.eval
 
-            self.best_local = self.population[0]
-            for genome in self.population:
-                if (genome.fitness > self.best_local.fitness):
-                    self.best_local = genome.clone()
+        with Profiler()["eval"]:
+            while self.generation < self.config.generations or self.config.generations == 0:
 
-            if (self.best_local.fitness > self.best_global.fitness):
-                self.best_global = self.best_local.clone()
+                with Profiler()["fitness"]:
+                    fitness_function(self.population)
 
-            start_reset = time.perf_counter()
-            self.reset()
-            stop_reset = time.perf_counter()
+                self.best_local = max(self.population, key=lambda g: g.fitness).clone()
+                if self.best_local.fitness > self.best_global.fitness:
+                    self.best_global = self.best_local.clone()
 
-            if (report):
-                sim_time = stop_sim - start_sim
-                reset_time = stop_reset - start_reset
-                self.report(reset_time, sim_time)
+                with Profiler()["reset"]:
+                    if (self.config.speciation):
+                        self.reset_species()
+                    else:
+                        self.reset_population()
 
-            if (fitness and self.best_global.fitness >= fitness):
-                break
+                if (self.config.log_progress):
+                    self.report()
 
-        if save_on_done:
+                if (self.config.target_fitness and self.best_global.fitness >= self.config.target_fitness):
+                    break
+
+        if self.config.save_genome:
             fit_name = f"{self.best_global.fitness:.4f}".replace(".", "-")
             save_genome(self.best_global, f"genomes/genome_gen_fit_{fit_name}")
 
-    def report(self, reset_time: float, sim_time:float):
+        print(f"Eval: {Profiler().get("eval")}")
+
+    def report(self, ):
         print(f"=== [Generation: {self.generation}] ===")
-        print(f"Reset time: {reset_time:.4f}ms")
-        print(f"ium time: {sim_time:.4f}ms")
+        print(f"Reset time: {Profiler().get("reset"):.4f}ms")
+        print(f"Sim time: {Profiler().get("fitness"):.4f}ms")
         print(f"Local Fitness: {self.best_local.fitness:.6f}")
         print(f"Global Fitness: {self.best_global.fitness:.6f}")
         print(f"Genes history: {len(self.gh.all_genes)}")
+
+        if (self.config.speciation):
+            stale = [sp.staleness for sp in self.species]
+            stale.sort(reverse=True)
+            print(f"Staleness: {stale}")
+
+            species_sizes = [len(sp.members) for sp in self.species]
+            species_sizes.sort(reverse=True)
+            print(f"Species Sizes: {species_sizes}")
+
         self.best_global.info()
+
         print()
+
+
+# 136.60020986699965
+# 79.3463093420014

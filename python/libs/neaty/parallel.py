@@ -1,26 +1,28 @@
-from collections.abc import Callable
 from multiprocessing import Pool, cpu_count
-from multiprocessing.pool import AsyncResult
+from collections.abc import Callable
+from contextlib import closing
 from .genome import Genome
-from typing import TypeVar
-
-T = TypeVar("T")
+import math
 
 
 class MultiEvaluator:
-    def __init__(self, fitness_function: Callable[[list[Genome]], None], workers: int | None,) -> None:
+    def __init__(self, fitness_function: Callable[[list[Genome]], list[float]], workers: int | None = None) -> None:
         self.workers = workers if workers else cpu_count()
         self.fitness_function = fitness_function
-        self.pool = Pool(self.workers)
 
-    def __del__(self):
-        print("cleaning object")
-        self.pool.close()
-        self.pool.join()
-        self.pool.terminate()
+    def _split_list(self, l: list[Genome], chunks: int) -> list[list[Genome]]:
+        size = math.ceil(len(l) / chunks)
+        return [l[i:i+size] for i in range(0, len(l), size)]
 
-    def eval(self, genomes: list[Genome]):
-        evaluations: list[AsyncResult[None]] = []
+    def eval(self, genomes: list[Genome]) -> list[float]:
+        batch_of_genomes = self._split_list(genomes, self.workers)
+        results: list[list[float]] = []
 
-        for genome in genomes:
-            evaluations.append(self.pool.apply_async(self.fitness_function, [genome]))
+        with closing(Pool(processes=self.workers)) as pool:
+            results = pool.map(self.fitness_function, batch_of_genomes)
+
+        for genomes, fitnesses in zip(batch_of_genomes, results):
+            for genome, fitness in zip(genomes, fitnesses):
+                genome.fitness = fitness
+
+        return [0.0]

@@ -1,0 +1,42 @@
+[GENERAL]
+parallel            = True
+workers             = 4
+save_genome         = True
+log_progress        = True
+
+[NEAT]
+inputs              = 8
+outputs             = 3
+pop_size            = 100
+generations         = 0
+target_fitness      = 11.5
+
+[SPECIES]
+elitism             = 5
+speciation          = False
+target_species      = 10
+
+[MUTATE]
+prob_create_node    = .005
+prob_create_gene    = .03
+prob_remove_node    = .005
+prob_remove_gene    = .03
+
+[WEIGHT]
+weight_init_mean    = 0.0
+weight_max_value    = 10
+weight_min_value    = -10
+weight_init_stDev   = 5.0
+weight_mutate_rate  = 0.8
+weight_replace_rate = 0.1
+weight_mutate_power = 0.5
+
+[BIAS]
+bias_init_mean      = 0.0
+bias_max_value      = 10
+bias_min_value      = -10
+bias_init_stDev     = 5.0
+bias_mutate_rate    = 0.7
+bias_mutate_power   = 0.5
+bias_replace_rate   = 0.1
+

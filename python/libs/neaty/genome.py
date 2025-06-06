@@ -1,4 +1,5 @@
 from __future__ import annotations
+from .config import NeatConfig
 from .genome_history import *
 from itertools import count
 from .gene import *
@@ -7,8 +8,9 @@ import random
 
 
 class Genome:
-    def __init__(self, gh: GenomeHistory) -> None:
+    def __init__(self, config: NeatConfig, gh: GenomeHistory) -> None:
         self.genome_history = gh
+        self.config = config
 
         self.inputs = gh.inputs
         self.outputs = gh.outputs
@@ -25,15 +27,15 @@ class Genome:
 
         node_key = 0
         for _ in range(self.inputs):
-            self.nodes[node_key] = Node(node_key, 0)
-            node_key+= 1
+            self.nodes[node_key] = Node(self.config, node_key, 0)
+            node_key += 1
 
         for _ in range(self.outputs):
-            self.nodes[node_key] = Node(node_key, 1)
-            node_key+= 1
+            self.nodes[node_key] = Node(self.config, node_key, 1)
+            node_key += 1
 
     def clone(self):
-        clone = Genome(self.genome_history)
+        clone = Genome(self.config, self.genome_history)
 
         clone.adjusted_fitness = self.adjusted_fitness
         clone.fitness = self.fitness
@@ -59,7 +61,7 @@ class Genome:
             n1, n2 = n2, n1
 
         c = self.genome_history.exists(n1, n2)
-        new_gene = Gene(n1, n2)
+        new_gene = Gene(self.config, n1, n2)
 
         if c:
             new_gene.innovation = c.innovation
@@ -81,13 +83,13 @@ class Genome:
         if len(self.genes) == 0:
             self.add_gene()
 
-        if random.random() < .5:
+        if random.random() < self.config.prob_create_gene:
             self.add_gene()
-        if random.random() < .2:
+        if random.random() < self.config.prob_create_node:
             self.add_node()
-        if random.random() < .5:
+        if random.random() < self.config.prob_remove_gene:
             self.remove_gene()
-        if random.random() < .2:
+        if random.random() < self.config.prob_remove_node:
             self.remove_node()
 
         for gene in self.genes.values():
@@ -122,7 +124,7 @@ class Genome:
 
         gene = random.choice(enabled_genes)
         get_node_id = self.get_new_node_key()
-        node = Node(get_node_id, (gene.in_node.layer + gene.out_node.layer) / 2)
+        node = Node(self.config, get_node_id, (gene.in_node.layer + gene.out_node.layer) / 2)
 
         gene1 = self.connect_nodes(gene.in_node, node)
         gene2 = self.connect_nodes(node, gene.out_node)
@@ -189,7 +191,6 @@ class Genome:
 
         return key
 
-
     def connect_genes(self):
 
         for gene in self.genes.values():
@@ -234,7 +235,7 @@ class Genome:
         return max(x.innovation for x in genes.values())
 
     def crossover(self, partner: Genome) -> Genome:
-        child = Genome(self.genome_history)
+        child = Genome(self.config, self.genome_history)
         child.genes.clear()
         child.nodes.clear()
 

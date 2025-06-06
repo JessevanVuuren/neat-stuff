@@ -4,7 +4,7 @@ from game_types import *
 
 class Coin(Particle):
     def __init__(self, pos: Vec2, size: float, color: str):
-        super().__init__(pos, size, 0, color) 
+        super().__init__(pos, size, 0, color)
 
     def update(self, dt: float):
         pass
@@ -22,6 +22,10 @@ class CoinSystem:
         self.entitys = entitys
         self.reset_coins()
         self.init_coins()
+
+    def add_entity(self, entity: Entity):
+        self.entitys.append(entity)
+        self.spawn_coin(entity)
 
     def reset_coins(self):
         self.coins = {}
