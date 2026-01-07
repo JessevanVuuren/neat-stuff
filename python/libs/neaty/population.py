@@ -6,8 +6,8 @@ from .parallel import MultiEvaluator
 from .config import NeatConfig
 from .profiler import Profiler
 from .genome import Genome
-from .species import *
-from .manager import *
+from .manager import save_genome
+from .species import Species
 
 import random
 
@@ -35,7 +35,7 @@ class Population:
         self.best_local = self.population[0]
         self.best_global = self.population[0]
 
-    def speciate(self):
+    def speciate(self) -> None:
         for sp in self.species:
             sp.members.clear()
             sp.representative = random.choice(sp.members) if sp.members else sp.representative
@@ -52,7 +52,7 @@ class Population:
 
         self.species = [sp for sp in self.species if len(sp.members) > 0]
 
-    def set_allowed_offspring(self):
+    def set_allowed_offspring(self) -> None:
         total_adjusted_fitness = 0.0
         for sp in self.species:
             sp.adjusted_fitness()
@@ -78,7 +78,7 @@ class Population:
                 sp.allow_offspring -= 1
                 total_offspring -= 1
 
-    def adjust_compatibility_threshold(self):
+    def adjust_compatibility_threshold(self) -> None:
         species_diff = len(self.species) - self.target_species_count
 
         if abs(species_diff) > 1:
@@ -86,7 +86,7 @@ class Population:
 
         self.compatibility_threshold = max(0.5, min(self.compatibility_threshold, 15.0))
 
-    def reset_species(self):
+    def reset_species(self) -> None:
         self.generation += 1
         self.speciate()
 
@@ -109,9 +109,9 @@ class Population:
         while len(new_pop) < self.pop_size:
             new_pop.append(Genome(self.config, self.gh))
 
-        self.population = new_pop[:self.pop_size]
+        self.population = new_pop[: self.pop_size]
 
-    def reset_population(self):
+    def reset_population(self) -> None:
         self.generation += 1
 
         parents = self.population.copy()
@@ -130,18 +130,16 @@ class Population:
 
         self.population[0] = self.best_global.clone()
         for i in range(self.config.elitism):
-            if (i + 1 < len(self.population) and i < len(parents)):
+            if i + 1 < len(self.population) and i < len(parents):
                 self.population[i + 1] = parents[i].clone()
 
-    def run(self, fitness_function: Callable[[list[Genome]], list[float]]):
-
-        if (self.config.parallel):
+    def run(self, fitness_function: Callable[[list[Genome]], list[float]]) -> None:
+        if self.config.parallel:
             evaluator = MultiEvaluator(fitness_function, self.config.workers)
             fitness_function = evaluator.eval
 
         with Profiler()["eval"]:
             while self.generation < self.config.generations or self.config.generations == 0:
-
                 with Profiler()["fitness"]:
                     fitness_function(self.population)
 
@@ -150,32 +148,34 @@ class Population:
                     self.best_global = self.best_local.clone()
 
                 with Profiler()["reset"]:
-                    if (self.config.speciation):
+                    if self.config.speciation:
                         self.reset_species()
                     else:
                         self.reset_population()
 
-                if (self.config.log_progress):
+                if self.config.log_progress:
                     self.report()
 
-                if (self.config.target_fitness and self.best_global.fitness >= self.config.target_fitness):
+                if self.config.target_fitness and self.best_global.fitness >= self.config.target_fitness:
                     break
 
         if self.config.save_genome:
             fit_name = f"{self.best_global.fitness:.4f}".replace(".", "-")
             save_genome(self.best_global, f"genomes/genome_gen_fit_{fit_name}")
 
-        print(f"Eval: {Profiler().get("eval")}")
+        print(f"Eval: {Profiler().get('eval')}")
 
-    def report(self, ):
+    def report(
+        self,
+    ) -> None:
         print(f"=== [Generation: {self.generation}] ===")
-        print(f"Reset time: {Profiler().get("reset"):.4f}ms")
-        print(f"Sim time: {Profiler().get("fitness"):.4f}ms")
+        print(f"Reset time: {Profiler().get('reset'):.4f}ms")
+        print(f"Sim time: {Profiler().get('fitness'):.4f}ms")
         print(f"Local Fitness: {self.best_local.fitness:.6f}")
         print(f"Global Fitness: {self.best_global.fitness:.6f}")
         print(f"Genes history: {len(self.gh.all_genes)}")
 
-        if (self.config.speciation):
+        if self.config.speciation:
             stale = [sp.staleness for sp in self.species]
             stale.sort(reverse=True)
             print(f"Staleness: {stale}")

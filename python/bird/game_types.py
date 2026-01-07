@@ -1,13 +1,16 @@
 from __future__ import annotations
 
-from neat_ref import *
-
+from utils import dataclass, field, Protocol, BaseEnum, Enum
+from neaty import Genome
+from bird import Bird
 import pygame
+
 
 @dataclass
 class FlyBird:
     body: Bird
     brain: Genome
+
 
 @dataclass
 class Graphics:
@@ -18,7 +21,6 @@ class Graphics:
     current_surface: pygame.Surface | None = None
     assets: list[pygame.Surface] = field(default_factory=lambda: [])
     anchor_point: pygame.Vector2 = field(default_factory=lambda: pygame.math.Vector2(0, 0))
-
 
 
 class Pipe(Protocol):
@@ -44,4 +46,3 @@ class ActionState(Enum):
     DOWN = 1
     STAY = 2
     FLY = 3
-

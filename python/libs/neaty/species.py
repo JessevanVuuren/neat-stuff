@@ -12,7 +12,7 @@ class Species:
         self.staleness = 0
         self.best_fitness = member.fitness
 
-    def update_staleness(self):
+    def update_staleness(self) -> None:
         max_member = max([m.fitness for m in self.members])
         if max_member > self.best_fitness:
             self.best_fitness = max_member
@@ -20,7 +20,7 @@ class Species:
         else:
             self.staleness += 1
 
-    def add(self, genome: Genome):
+    def add(self, genome: Genome) -> None:
         self.members.append(genome)
         if genome.fitness > self.representative.fitness:
             self.representative = genome
@@ -29,7 +29,7 @@ class Species:
         compatibility = self.representative.calculate_compatibility(genome)
         return compatibility < threshold
 
-    def adjusted_fitness(self):
+    def adjusted_fitness(self) -> None:
         for genome in self.members:
             genome.adjusted_fitness = genome.fitness / len(self.members)
 
@@ -49,7 +49,7 @@ class Species:
             current += g.adjusted_fitness
             if current >= selection:
                 return g
-            
+
         return self.representative
 
     def give_random_offspring(self, gh: GenomeHistory) -> Genome:

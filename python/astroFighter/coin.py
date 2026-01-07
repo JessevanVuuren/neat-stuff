@@ -1,5 +1,6 @@
+from game_types import Entity, Vec2, Particle, Surface
 from random import randint
-from game_types import *
+import globals as gl
 
 
 class Coin(Particle):
@@ -35,13 +36,13 @@ class CoinSystem:
             self.spawn_coin(agent)
 
     def spawn_coin(self, agent: Entity):
-        x = randint(10, SCREEN_WIDTH - 10)
-        y = randint(10, SCREEN_HEIGHT - 10)
+        x = randint(10, gl.SCREEN_WIDTH - 10)
+        y = randint(10, gl.SCREEN_HEIGHT - 10)
 
         self.coins[agent.id] = Coin(Vec2(x, y), 5, "#FFDD33")
 
     def update(self, agent: Entity):
-        if (self.coins[agent.id].get_square().overlap(agent.get_square())):
+        if self.coins[agent.id].get_square().overlap(agent.get_square()):
             agent.coins += 1
 
             self.spawn_coin(agent)

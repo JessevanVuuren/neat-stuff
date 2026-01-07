@@ -1,6 +1,17 @@
-from neaty.manager import save_genome, load_genome
-from neaty.genome_history import GenomeHistory
-from neaty.config import Config, NeatConfig
-from neaty.parallel import MultiEvaluator
-from neaty.population import Population
-from neaty.genome import Genome
+from .manager import save_genome, load_genome
+from .genome_history import GenomeHistory
+from .config import Config, NeatConfig
+from .parallel import MultiEvaluator
+from .population import Population
+from .genome import Genome
+
+__all__ = [
+    "save_genome",
+    "load_genome",
+    "GenomeHistory",
+    "Config",
+    "NeatConfig",
+    "MultiEvaluator",
+    "Population",
+    "Genome",
+]

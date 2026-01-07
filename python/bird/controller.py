@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-from population_bird import *
+from population_bird import PopulationBird
 from renderer import Render
-from game_types import *
-from neat_ref import *
-from globals import *
+from game_types import ActionState, Bird, Pipe
+import globals as gl
+from utils import Sequence, abstractmethod
+import pygame
 
 
 class GameController:
@@ -39,7 +40,6 @@ class ManualController(GameController):
         else:
             self.bird.move(ActionState.STAY, dt)
 
-
     def reset(self):
         self.bird.reset()
 
@@ -53,7 +53,7 @@ class NeatController(GameController):
         self.population.update(pipes, dt)
 
         for bird in self.population.population:
-            if (not bird.dead):
+            if not bird.dead:
                 self.render.graphics_surface(bird.graphics)
 
     def handle_inputs(self, dt: float):
@@ -97,7 +97,7 @@ class StaticController(PhysicsController):
 
 class DynamicController(PhysicsController):
     def think(self, out: list[float]) -> ActionState:
-        if (out[0] > .5):
+        if out[0] > 0.5:
             return ActionState.FLY
         else:
             return ActionState.STAY
@@ -112,5 +112,5 @@ class DynamicController(PhysicsController):
             case 0:
                 return 1
             case _:
-                bird.rotation -= bird.velocity * BIRD_ROTATION_SCALE
+                bird.rotation -= bird.velocity * gl.BIRD_ROTATION_SCALE
                 return 2

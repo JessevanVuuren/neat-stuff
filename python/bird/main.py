@@ -3,26 +3,47 @@ from __future__ import annotations
 from population_bird import PopulationBird
 from renderer import Render
 from pipe import PipeObject
-from controller import *
-from game_types import *
-from neat_ref import *
-from globals import *
+from controller import (
+    DynamicController,
+    GameController,
+    ManualController,
+    NeatController,
+    PhysicsController,
+    StaticController,
+)
+from game_types import ActionState, GameType, GamePlayer
+import globals as gl
+from neaty import Config, NeatConfig, GenomeHistory
 from bird import Bird
 
 import pygame
 
 pygame.init()
 
-assert (GAME_TYPE in GameType)
-assert (GAME_PLAYER in GamePlayer)
+assert gl.GAME_TYPE in GameType
+assert gl.GAME_PLAYER in GamePlayer
 
 clock = pygame.time.Clock()
 running = True
 dt = 0
 
-bird_sprites = [["./assets/redbird-downflap.png", "./assets/redbird-midflap.png", "./assets/redbird-upflap.png"],
-                ["./assets/yellowbird-downflap.png", "./assets/yellowbird-midflap.png", "./assets/yellowbird-upflap.png"],
-                ["./assets/bluebird-downflap.png", "./assets/bluebird-midflap.png", "./assets/bluebird-upflap.png"],]
+bird_sprites = [
+    [
+        "./assets/redbird-downflap.png",
+        "./assets/redbird-midflap.png",
+        "./assets/redbird-upflap.png",
+    ],
+    [
+        "./assets/yellowbird-downflap.png",
+        "./assets/yellowbird-midflap.png",
+        "./assets/yellowbird-upflap.png",
+    ],
+    [
+        "./assets/bluebird-downflap.png",
+        "./assets/bluebird-midflap.png",
+        "./assets/bluebird-upflap.png",
+    ],
+]
 
 
 def quit_actions():
@@ -42,16 +63,17 @@ def manual_inputs():
         player.move(ActionState.FLY, dt)
 
 
-genome_history = GenomeHistory(NEAT_INPUTS, NEAT_OUTPUT)
-pop = PopulationBird(genome_history, NEAT_POP_SIZE, lambda: Bird(genome_history, bird_sprites))
+config = Config("config", NeatConfig()).parse()
+genome_history = GenomeHistory(config)
+pop = PopulationBird(config.pop_size, lambda: Bird(config, genome_history, bird_sprites))
 
 render = Render()
 render.set_background("./assets/background-day.png", True, True)
 
-player = Bird(genome_history, bird_sprites)
+player = Bird(config, genome_history, bird_sprites)
 
 physicsController: PhysicsController
-match GAME_TYPE:
+match gl.GAME_TYPE:
     case GameType.STATIC.value:
         physicsController = StaticController()
     case GameType.DYNAMIC.value:
@@ -60,7 +82,7 @@ match GAME_TYPE:
         raise ValueError("Unsupported GAME_TYPE mode")
 
 gameController: GameController
-match GAME_PLAYER:
+match gl.GAME_PLAYER:
     case GamePlayer.NEAT.value:
         gameController = NeatController(pop, render)
     case GamePlayer.MANUAL.value:
@@ -80,8 +102,6 @@ while True:
     dt = 0
 
     while not pop.all_dead() and not player.dead:
-
-
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
@@ -94,7 +114,7 @@ while True:
         gameController.update(pipes, dt)
         gameController.handle_inputs(dt)
 
-        if (last_pipe.pos_x < SCREEN_WIDTH - PIPE_GAP_BETWEEN - PIPE_WIDTH):
+        if last_pipe.pos_x < gl.SCREEN_WIDTH - gl.PIPE_GAP_BETWEEN - gl.PIPE_WIDTH:
             pipe = PipeObject("./assets/pipe-green.png")
             pipes.append(pipe)
             last_pipe = pipe
@@ -104,10 +124,10 @@ while True:
             render.render(pipe.graphics_top)
             render.render(pipe.graphics_bottom)
 
-        if (pipes[:1][0].pos_x <= -PIPE_WIDTH):
+        if pipes[:1][0].pos_x <= -gl.PIPE_WIDTH:
             pipes.pop(0)
 
-        play_time = clock.tick(FPS)
+        play_time = clock.tick(gl.FPS)
         dt = play_time / 1000
         render.display()
 

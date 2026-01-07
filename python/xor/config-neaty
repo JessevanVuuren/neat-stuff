@@ -1,15 +1,15 @@
 [GENERAL]
-parallel            = False
+parallel            = True
 workers             = 4
-save_genome         = True
+save_genome         = False
 log_progress        = True
 
 [NEAT]
-inputs              = 8
-outputs             = 3
+inputs              = 3
+outputs             = 1
 pop_size            = 100
 generations         = 0
-target_fitness      = 11.5
+target_fitness      = 3.999
 
 [SPECIES]
 elitism             = 5

@@ -1,7 +1,12 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
 from .config import NeatConfig
-from .node import Node
+
 import random
 import math
+
+if TYPE_CHECKING:
+    from .node import Node
 
 
 class Gene(object):
@@ -16,8 +21,8 @@ class Gene(object):
         self.enabled = True
 
     def mutate(self):
-        if (random.random() < self.config.weight_mutate_rate):
-            if (random.random() < self.config.weight_replace_rate):
+        if random.random() < self.config.weight_mutate_rate:
+            if random.random() < self.config.weight_replace_rate:
                 self.weight = self.gaussian_number() * self.config.weight_init_stdev + self.config.weight_init_mean
             else:
                 delta = self.gaussian_number() * self.config.weight_mutate_power
@@ -25,7 +30,7 @@ class Gene(object):
 
         self.weight = self.clamp(self.weight)
 
-    def clamp(self, number: float):
+    def clamp(self, number: float) -> float:
         return max(self.config.weight_min_value, min(number, self.config.weight_max_value))
 
     def gaussian_number(self) -> float:
@@ -34,7 +39,7 @@ class Gene(object):
 
         return math.sqrt(-2 * math.log(rand1)) * math.cos(2 * math.pi * rand2)
 
-    def clone(self):
+    def clone(self) -> Gene:
         gene = Gene(self.config, self.in_node, self.out_node)
         gene.weight = self.weight
         gene.innovation = self.innovation

@@ -10,9 +10,9 @@ class Profiler:
         self._current_time: float
 
     def __getitem__(self, key: str):
-        if (key in Profiler._measurements):
+        if key in Profiler._measurements:
             raise LookupError(f"measurement key: {key} already in use")
-        
+
         self._current_key = key
         return self
 
@@ -20,12 +20,12 @@ class Profiler:
         self._current_time = time.perf_counter()
         return self
 
-    def get(self, key: str, remove:bool=True):
-        if (key not in Profiler._measurements):
+    def get(self, key: str, remove: bool = True) -> float:
+        if key not in Profiler._measurements:
             raise LookupError(f"measurement for key: {key} not found")
 
         value = Profiler._measurements[key]
-        if (remove):
+        if remove:
             del Profiler._measurements[key]
         return value
 

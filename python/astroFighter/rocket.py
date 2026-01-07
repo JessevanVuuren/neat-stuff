@@ -1,16 +1,14 @@
 from __future__ import annotations
 
-from game_types import *
-from particles import *
-from globals import *
-from utils import *
-from coin import *
+from particles import ParticleSystem, ParticleExhaust, ParticleSmoke
+import globals as gl
+from utils import gradient_color
+from game_types import Vec2, Entity
 
 import math
 
 
 class Rocket(Entity):
-
     def __init__(self, pos: Vec2, size: Vec2, ps: ParticleSystem, training_mode: bool = True):
         Entity.__init__(self, pos, size.x, size.y, 0)
         self.training_mode = training_mode
@@ -25,7 +23,7 @@ class Rocket(Entity):
         self.right_thrust_pos = Vec2(-25, 31.4)
         self.middle_thrust_pos = Vec2(-25, 0)
 
-        if (not training_mode):
+        if not training_mode:
             self.smokeRange = gradient_color("white", "#181818", 60)
             self.exhaustRange = gradient_color("red", "yellow", 60)
 
@@ -34,7 +32,6 @@ class Rocket(Entity):
         self.wrap()
 
     def move(self, forward: bool, right: bool, left: bool, delta_time: float):
-
         if forward:
             self.forward(delta_time)
         elif self.velocity > 0:
@@ -55,25 +52,25 @@ class Rocket(Entity):
         self.pos.y += horizontal
 
     def brake(self, delta_time: float):
-        self.velocity *= math.pow((1 - BRAKE_FORCE), delta_time)
+        self.velocity *= math.pow((1 - gl.BRAKE_FORCE), delta_time)
 
     def forward(self, delta_time: float):
         self.thrust_effect(self.middle_thrust_pos)
-        self.velocity = min(self.velocity + ACCELERATION * delta_time, MAX_VELOCITY)
+        self.velocity = min(self.velocity + gl.ACCELERATION * delta_time, gl.MAX_VELOCITY)
 
     def turn_left(self, delta_time: float):
         self.thrust_effect(self.left_thrust_pos)
-        self.angle += ROTATION_VELOCITY * delta_time
+        self.angle += gl.ROTATION_VELOCITY * delta_time
 
     def turn_right(self, delta_time: float):
         self.thrust_effect(self.right_thrust_pos)
-        self.angle -= ROTATION_VELOCITY * delta_time
+        self.angle -= gl.ROTATION_VELOCITY * delta_time
 
     def thrust_effect(self, pos: Vec2):
         if self.training_mode:
             return
 
-        exhaust = ParticleExhaust(self, pos.x, pos.y, 3, .1, self.exhaustRange, 4, 30)
+        exhaust = ParticleExhaust(self, pos.x, pos.y, 3, 0.1, self.exhaustRange, 4, 30)
         smoke = ParticleSmoke(self, pos.x - 39, pos.y * 1.2, 4, 1, self.smokeRange, 15)
 
         self.ps.add_particle(exhaust)

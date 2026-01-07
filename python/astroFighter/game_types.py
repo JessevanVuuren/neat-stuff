@@ -3,8 +3,8 @@ from abc import ABC, abstractmethod
 
 from dataclasses import dataclass
 from pygame import Surface
-from neat_ref import *
-from globals import *
+from neaty import Genome
+import globals as gl
 
 import math
 import uuid
@@ -42,11 +42,7 @@ class SpaceMan:
     idle_time = 0.0
 
     def extract(self) -> tuple[Entity, Graphic, Genome]:
-        return (
-            self.gameobject.player,
-            self.gameobject.graphics,
-            self.brain
-        )
+        return (self.gameobject.player, self.gameobject.graphics, self.brain)
 
 
 @dataclass
@@ -57,7 +53,6 @@ class Square:
     h: float
 
     def overlap(self, b: Square) -> bool:
-
         if self.x + self.w <= b.x or b.x + b.w <= self.x:
             return False
 
@@ -178,14 +173,14 @@ class Entity(ABC):
         return Square(self._pos.x, self._pos.y, self._width, self._height)
 
     def wrap(self):
-        if (self.pos.x > SCREEN_WIDTH):
+        if self.pos.x > gl.SCREEN_WIDTH:
             self.pos = Vec2(-self.width, self.pos.y)
-        if (self.pos.y > SCREEN_HEIGHT):
+        if self.pos.y > gl.SCREEN_HEIGHT:
             self.pos = Vec2(self.pos.x, -self.height)
-        if (self.pos.x < -self.width):
-            self.pos = Vec2(SCREEN_WIDTH, self.pos.y)
-        if (self.pos.y < -self.height):
-            self.pos = Vec2(self.pos.x, SCREEN_HEIGHT)
+        if self.pos.x < -self.width:
+            self.pos = Vec2(gl.SCREEN_WIDTH, self.pos.y)
+        if self.pos.y < -self.height:
+            self.pos = Vec2(self.pos.x, gl.SCREEN_HEIGHT)
 
 
 class Particle(ABC):

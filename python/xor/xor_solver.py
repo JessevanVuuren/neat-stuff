@@ -1,6 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass
-from neat_ref import *
+from neaty import NeatConfig, GenomeHistory, Genome
+
 import random
 
 
@@ -11,16 +12,17 @@ class XorInput:
 
 
 class XORsolver:
-    def __init__(self, gh: GenomeHistory) -> None:
+    def __init__(self, config: NeatConfig, gh: GenomeHistory) -> None:
         self.gh = gh
         self.fitness = 0.0
+        self.config = config
 
-        self.brian = Genome(gh)
+        self.brian = Genome(config, gh)
         for _ in range(10):
             self.brian.mutate()
 
     def mate(self, partner: XORsolver):
-        xor = XORsolver(self.gh)
+        xor = XORsolver(self.config, self.gh)
         xor.brian = self.brian.crossover(partner.brian)
         return xor
 
@@ -39,12 +41,12 @@ class XORsolver:
 
 
 class Population_xor:
-    def __init__(self, gh: GenomeHistory, pop_size: int) -> None:
+    def __init__(self, config: NeatConfig, gh: GenomeHistory, pop_size: int) -> None:
         self.pop_size = pop_size
 
         self.population: list[XORsolver] = []
         for _ in range(pop_size):
-            self.population.append(XORsolver(gh))
+            self.population.append(XORsolver(config, gh))
 
         self.gh = gh
 
@@ -68,12 +70,11 @@ class Population_xor:
     def update(self, inputs: list[XorInput]):
         self.local_best = self.population[0]
         for agent in self.population:
-
             fitness = agent.calculate_fitness(inputs)
 
-            if (fitness > self.local_best.fitness):
+            if fitness > self.local_best.fitness:
                 self.local_best = agent
-            if (fitness > self.global_best.fitness):
+            if fitness > self.global_best.fitness:
                 self.global_best = agent
 
         return self.local_best

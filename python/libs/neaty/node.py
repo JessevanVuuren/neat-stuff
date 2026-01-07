@@ -1,7 +1,14 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
 from .config import NeatConfig
-from .gene import Gene
+
 import random
 import math
+
+if TYPE_CHECKING:
+    from .gene import Gene
+    from .gene import Node
 
 
 class Node:
@@ -17,9 +24,9 @@ class Node:
 
         self.genes: list[Gene] = []
 
-    def mutate(self):
-        if (random.random() < self.config.bias_mutate_rate):
-            if (random.random() < self.config.bias_replace_rate):
+    def mutate(self) -> None:
+        if random.random() < self.config.bias_mutate_rate:
+            if random.random() < self.config.bias_replace_rate:
                 self.bias = self.gaussian_number() * self.config.bias_init_stdev + self.config.bias_init_mean
             else:
                 delta = self.gaussian_number() * self.config.bias_mutate_power
@@ -27,7 +34,7 @@ class Node:
 
         self.bias = self.clamp(self.bias, self.config.bias_min_value, self.config.bias_max_value)
 
-    def clamp(self, number: float, min_value: float, max_value: float):
+    def clamp(self, number: float, min_value: float, max_value: float) -> float:
         return max(min_value, min(number, max_value))
 
     def gaussian_number(self) -> float:
@@ -40,13 +47,13 @@ class Node:
         val = self.clamp(x, -100, 100) * 5.0
         return 1 / (1 + math.exp(-val))
 
-    def clone(self):
+    def clone(self) -> Node:
         n = Node(self.config, self.number, self.layer)
         n.output = self.output
         n.bias = self.bias
         return n
 
-    def calculate(self):
+    def calculate(self) -> None:
         if self.calculated:
             return
 

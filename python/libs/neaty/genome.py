@@ -1,9 +1,9 @@
 from __future__ import annotations
 from .config import NeatConfig
-from .genome_history import *
+from .genome_history import GenomeHistory
 from itertools import count
-from .gene import *
-from .node import *
+from .gene import Gene
+from .node import Node
 import random
 
 
@@ -22,8 +22,8 @@ class Genome:
 
         self.sorted_nodes: list[Node] = []
 
-        self.fitness = 0.0
-        self.adjusted_fitness = 0.0
+        self.fitness: float = 0.0
+        self.adjusted_fitness: float = 0.0
 
         node_key = 0
         for _ in range(self.inputs):
@@ -34,7 +34,7 @@ class Genome:
             self.nodes[node_key] = Node(self.config, node_key, 1)
             node_key += 1
 
-    def clone(self):
+    def clone(self) -> Genome:
         clone = Genome(self.config, self.genome_history)
 
         clone.adjusted_fitness = self.adjusted_fitness
@@ -53,7 +53,7 @@ class Genome:
         clone.cache_sorted_nodes()
         return clone
 
-    def connect_nodes(self, n1: Node, n2: Node):
+    def connect_nodes(self, n1: Node, n2: Node) -> Gene | None:
         n1_layer = n1.layer if n1.layer != 1 else 1000000
         n2_layer = n2.layer if n2.layer != 1 else 1000000
 
@@ -75,11 +75,13 @@ class Genome:
             self.genes[new_gene.innovation] = new_gene
             return new_gene
 
-    def cache_sorted_nodes(self):
-        self.sorted_nodes = [n for n in list(self.nodes.values())[self.inputs + self.outputs:]]
+        return None
+
+    def cache_sorted_nodes(self) -> None:
+        self.sorted_nodes = [n for n in list(self.nodes.values())[self.inputs + self.outputs :]]
         self.sorted_nodes.sort(key=lambda x: x.layer)
 
-    def mutate(self):
+    def mutate(self) -> None:
         if len(self.genes) == 0:
             self.add_gene()
 
@@ -101,7 +103,7 @@ class Genome:
         self.connect_genes()
         self.cache_sorted_nodes()
 
-    def add_gene(self):
+    def add_gene(self) -> None:
         values = list(self.nodes.values())
 
         n1 = random.choice(values)
@@ -113,7 +115,7 @@ class Genome:
 
         self.connect_nodes(n1, n2)
 
-    def add_node(self):
+    def add_node(self) -> None:
         if len(self.genes) == 0:
             self.add_gene()
 
@@ -137,16 +139,16 @@ class Genome:
         gene.enabled = False
         self.nodes[get_node_id] = node
 
-    def remove_node(self):
-        if (self.inputs + self.outputs >= len(self.nodes)):
+    def remove_node(self) -> None:
+        if self.inputs + self.outputs >= len(self.nodes):
             return
 
-        nodes = [n for n in list(self.nodes.values())[self.inputs + self.outputs:]]
+        nodes = [n for n in list(self.nodes.values())[self.inputs + self.outputs :]]
         node_to_delete = random.choice(nodes)
 
         genes_to_delete: list[Gene] = []
         for gene in self.genes.values():
-            if (gene.in_node.number == node_to_delete.number or gene.out_node.number == node_to_delete.number):
+            if gene.in_node.number == node_to_delete.number or gene.out_node.number == node_to_delete.number:
                 genes_to_delete.append(gene)
 
         for gene in genes_to_delete:
@@ -154,8 +156,8 @@ class Genome:
 
         self.nodes.pop(node_to_delete.number)
 
-    def remove_gene(self):
-        if (len(self.genes) == 0):
+    def remove_gene(self) -> None:
+        if len(self.genes) == 0:
             return
 
         if self.genes:
@@ -165,7 +167,7 @@ class Genome:
     def get_node(self, n: int) -> Node:
         node = self.nodes.get(n)
 
-        if (not node):
+        if not node:
             raise Exception(f"Node not found, number: {n}")
 
         return node
@@ -173,15 +175,15 @@ class Genome:
     def get_gene(self, innovation: int) -> Gene:
         gene = self.genes.get(innovation)
 
-        if (not gene):
+        if not gene:
             raise Exception(f"Gene not found, innovation: {innovation}")
 
         return gene.clone()
 
-    def exists(self, innovation: int):
+    def exists(self, innovation: int) -> bool:
         return innovation in self.genes
 
-    def get_new_node_key(self):
+    def get_new_node_key(self) -> int:
         if self.node_indexer is None:
             self.node_indexer = count(max(self.nodes.keys(), default=-1) + 1)
 
@@ -191,8 +193,7 @@ class Genome:
 
         return key
 
-    def connect_genes(self):
-
+    def connect_genes(self) -> None:
         for gene in self.genes.values():
             gene.in_node = self.get_node(gene.in_node.number)
             gene.out_node = self.get_node(gene.out_node.number)
@@ -250,7 +251,7 @@ class Genome:
             gene2 = i in partner.genes
 
             if gene1 and gene2:
-                gene = self.genes[i] if random.random() < .5 else partner.genes[i]
+                gene = self.genes[i] if random.random() < 0.5 else partner.genes[i]
             elif gene1:
                 gene = self.genes[i]
             else:
@@ -261,7 +262,7 @@ class Genome:
 
         return child
 
-    def calculate_compatibility(self, partner: Genome):
+    def calculate_compatibility(self, partner: Genome) -> float:
         innovations1 = set(self.genes.keys())
         innovations2 = set(partner.genes.keys())
 
@@ -303,7 +304,7 @@ class Genome:
         delta = (c1 * excess + c2 * disjoint) / normalize + c3 * avg_weight_diff
         return delta
 
-    def info(self):
+    def info(self) -> None:
         print(f"Nodes: {len(self.nodes)}, Genes: {len(self.genes)}")
         layers = {x.layer for x in self.nodes.values()}
         print(f"Layers: {len(layers)}")

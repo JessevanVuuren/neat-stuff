@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-from game_types import *
-from neat_ref import *
-from globals import *
-from utils import *
+from game_types import Particle, FMinMax, Vec2, Entity
+from utils import clamp, map
+import globals as gl
 import pygame
 import random
 import math
@@ -21,6 +20,7 @@ class ParticleSystem:
         for particle in self.particles:
             particle.update(dt)
 
+
 class Star(Particle):
     def __init__(self, pos: Vec2, size: float, ttl: float, color: str, pulse: FMinMax, speed: float) -> None:
         super().__init__(pos, size, ttl, color)
@@ -29,18 +29,19 @@ class Star(Particle):
         self.speed = speed
 
     def update(self, dt: float):
-        self.ttl += .01
+        self.ttl += 0.01
         color_value = int((math.cos(self.ttl * self.speed) + 1) * self.pulse.max + self.pulse.min)
         color_value = clamp(color_value, 0, 255)
         self.color.a = int(color_value)
+
 
 class StarSystem:
     def __init__(self, amount: int, pulse: FMinMax, size: FMinMax, speed: FMinMax, colors: list[str]):
         self.stars: list[Particle] = []
 
         for _ in range(amount):
-            pos_x = random.randint(0, SCREEN_WIDTH)
-            pos_y = random.randint(0, SCREEN_HEIGHT)
+            pos_x = random.randint(0, gl.SCREEN_WIDTH)
+            pos_y = random.randint(0, gl.SCREEN_HEIGHT)
 
             star_size = random.random() * size.max + size.min
             star_speed = random.random() * speed.max + speed.min
@@ -59,7 +60,7 @@ class ParticleExhaust(Particle):
         self.color = color_range[random.randint(0, len(color_range) - 1)]
         super().__init__(Vec2(x, y), size, ttl, self.color)
 
-        self.cone = random.randrange(0, arc) - arc//2
+        self.cone = random.randrange(0, arc) - arc // 2
         self.rocked = rocked
         self.force = force
         self.moving = 0
@@ -79,6 +80,7 @@ class ParticleExhaust(Particle):
 
         self.pos.y = offset_pos.y - self.moving * math.sin(rotation)
         self.pos.x = offset_pos.x - self.moving * math.cos(rotation)
+
 
 class ParticleSmoke(Particle):
     def __init__(self, rocked: Entity, x: float, y: float, size: float, ttl: float, color_range: list[str], width: int) -> None:

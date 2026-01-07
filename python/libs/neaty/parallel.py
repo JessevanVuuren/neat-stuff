@@ -12,7 +12,7 @@ class MultiEvaluator:
 
     def _split_list(self, l: list[Genome], chunks: int) -> list[list[Genome]]:
         size = math.ceil(len(l) / chunks)
-        return [l[i:i+size] for i in range(0, len(l), size)]
+        return [l[i : i + size] for i in range(0, len(l), size)]
 
     def eval(self, genomes: list[Genome]) -> list[float]:
         batch_of_genomes = self._split_list(genomes, self.workers)

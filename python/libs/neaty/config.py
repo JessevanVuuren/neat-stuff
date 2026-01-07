@@ -46,7 +46,6 @@ class NeatConfig:
 
 class Config:
     def __init__(self, config_file: str, object: NeatConfig) -> None:
-
         if not os.path.isfile(config_file):
             raise FileNotFoundError(f"File {config_file} not found.")
 
@@ -73,21 +72,21 @@ class Config:
         except Exception as e:
             raise ValueError(f"Failed to parse '{field}' in section [{section}]: {e}")
 
-    def flatten(self, l: list[list[tuple[str, str]]]) -> list[str]:
-        return [x[0] for xs in l for x in xs]
+    def flatten(self, list: list[list[tuple[str, str]]]) -> list[str]:
+        return [x[0] for xs in list for x in xs]
 
     def _validate_missing(self, fields: list[str]):
         config = self.flatten([list(self.parser.items(s)) for s in self.parser.sections()])
         missing = False
         for field in fields:
-            if (field not in config):
+            if field not in config:
                 print(f"Attribute {field.lower()} missing")
                 missing = True
 
         if missing:
             raise ValueError("Missing required configuration fields")
 
-    def parse(self):
+    def parse(self) -> NeatConfig:
         fields: dict[str, type] = NeatConfig.__dict__.get("__annotations__")  # type: ignore
         configuration_attributes = list(fields.keys())
 
