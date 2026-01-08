@@ -1,6 +1,5 @@
+from neaty import Config, GenomeHistory, NeatConfig
 from xor_solver import Population_xor, XorInput
-from neaty import NeatConfig, GenomeHistory, Config
-
 
 config = Config("config-neaty", NeatConfig()).parse()
 genome_history = GenomeHistory(config)
@@ -15,7 +14,8 @@ xor: list[XorInput] = [
 pop = Population_xor(config, genome_history, 100)
 
 for i in range(100):
-    best_xor = pop.update(xor)
+    pop.update(xor)
+    best_xor = pop.global_best
 
     if pop.local_best.fitness == pop.global_best.fitness:
         print()

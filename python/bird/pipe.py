@@ -1,8 +1,9 @@
-from game_types import Graphics, Pipe
-import globals as gl
-from utils import tuple_2_vec2
-import pygame
 import random
+
+import globals as gl
+import pygame
+from game_types import Graphics, Pipe
+from utils import tuple_2_vec2
 
 
 class PipeObject(Pipe):

@@ -1,5 +1,5 @@
-from types import TracebackType
 import time
+from types import TracebackType
 
 
 class Profiler:

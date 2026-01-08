@@ -1,16 +1,14 @@
 from __future__ import annotations
-from dataclasses import dataclass
-
-from particles import ParticleSystem
-from rocket import Rocket
-from game_types import Vec2, Entity, Genome
-import globals as gl
-
-from coin import Coin, CoinSystem
-
-from neaty import NeatConfig, Config, GenomeHistory, Population
 
 import math
+from dataclasses import dataclass
+
+import globals as gl
+from coin import Coin, CoinSystem
+from game_types import Entity, Genome, Vec2
+from neaty import Config, GenomeHistory, NeatConfig, Population
+from particles import ParticleSystem
+from rocket import Rocket
 
 ps = ParticleSystem()
 cs = CoinSystem()

@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-from game_types import Particle, FMinMax, Vec2, Entity
-from utils import clamp, map
+import math
+import random
+
 import globals as gl
 import pygame
-import random
-import math
+from game_types import Entity, FMinMax, Particle, Vec2
+from utils import clamp, map
 
 
 class ParticleSystem:

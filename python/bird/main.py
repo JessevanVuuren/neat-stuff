@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from population_bird import PopulationBird
-from renderer import Render
-from pipe import PipeObject
+import globals as gl
+import pygame
+from bird import Bird
 from controller import (
     DynamicController,
     GameController,
@@ -11,12 +11,11 @@ from controller import (
     PhysicsController,
     StaticController,
 )
-from game_types import ActionState, GameType, GamePlayer
-import globals as gl
-from neaty import Config, NeatConfig, GenomeHistory
-from bird import Bird
-
-import pygame
+from game_types import ActionState, GamePlayer, GameType
+from neaty import Config, GenomeHistory, NeatConfig
+from pipe import PipeObject
+from population_bird import PopulationBird
+from renderer import Render
 
 pygame.init()
 

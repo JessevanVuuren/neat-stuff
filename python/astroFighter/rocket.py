@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from particles import ParticleSystem, ParticleExhaust, ParticleSmoke
-import globals as gl
-from utils import gradient_color
-from game_types import Vec2, Entity
-
 import math
+
+import globals as gl
+from game_types import Entity, Vec2
+from particles import ParticleExhaust, ParticleSmoke, ParticleSystem
+from utils import gradient_color
 
 
 class Rocket(Entity):

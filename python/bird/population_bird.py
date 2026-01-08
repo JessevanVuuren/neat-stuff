@@ -1,10 +1,17 @@
 from __future__ import annotations
-from collections.abc import Callable, Sequence
 
-from controller import PhysicsController, GameController
-from game_types import Pipe
-from bird import Bird
 import random
+from collections.abc import Callable, Sequence
+from typing import TYPE_CHECKING
+
+from bird import Bird
+
+if TYPE_CHECKING:
+    from controller import GameController, PhysicsController
+
+
+
+from game_types import Pipe
 
 
 class PopulationBird:

@@ -1,13 +1,13 @@
 from __future__ import annotations
-from abc import ABC, abstractmethod
-
-from dataclasses import dataclass
-from pygame import Surface
-from neaty import Genome
-import globals as gl
 
 import math
 import uuid
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
+
+import globals as gl
+from neaty import Genome
+from pygame import Surface
 
 
 @dataclass

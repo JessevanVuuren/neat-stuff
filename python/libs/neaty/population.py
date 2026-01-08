@@ -1,15 +1,15 @@
 from __future__ import annotations
 
-from .genome_history import GenomeHistory
-from collections.abc import Callable
-from .parallel import MultiEvaluator
-from .config import NeatConfig
-from .profiler import Profiler
-from .genome import Genome
-from .manager import save_genome
-from .species import Species
-
 import random
+from collections.abc import Callable
+
+from .config import NeatConfig
+from .genome import Genome
+from .genome_history import GenomeHistory
+from .manager import save_genome
+from .parallel import MultiEvaluator
+from .profiler import Profiler
+from .species import Species
 
 
 class Population:

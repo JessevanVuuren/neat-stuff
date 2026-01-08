@@ -14,6 +14,7 @@ dependencies = [
 dev = ["ruff>=0.14.10"]
 
 [tool.ruff]
+lint.extend-select = ["I"]
 line-length = 300
 lint.ignore = ["F401"]
 

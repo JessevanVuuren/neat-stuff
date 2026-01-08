@@ -1,8 +1,9 @@
 from __future__ import annotations
-from dataclasses import dataclass
-from neaty import NeatConfig, GenomeHistory, Genome
 
 import random
+from dataclasses import dataclass
+
+from neaty import Genome, GenomeHistory, NeatConfig
 
 
 @dataclass()
@@ -12,17 +13,18 @@ class XorInput:
 
 
 class XORsolver:
-    def __init__(self, config: NeatConfig, gh: GenomeHistory) -> None:
+    def __init__(self, config: NeatConfig, gh: GenomeHistory, mutate: bool = True) -> None:
         self.gh = gh
         self.fitness = 0.0
         self.config = config
 
         self.brian = Genome(config, gh)
-        for _ in range(10):
-            self.brian.mutate()
+        if mutate:
+            for _ in range(10):
+                self.brian.mutate()
 
     def mate(self, partner: XORsolver):
-        xor = XORsolver(self.config, self.gh)
+        xor = XORsolver(self.config, self.gh, mutate=False)
         xor.brian = self.brian.crossover(partner.brian)
         return xor
 
@@ -76,5 +78,3 @@ class Population_xor:
                 self.local_best = agent
             if fitness > self.global_best.fitness:
                 self.global_best = agent
-
-        return self.local_best

@@ -1,17 +1,16 @@
 from __future__ import annotations
 
+import math
+
+import globals as gl
+import pygame
+from coin import Coin, CoinSystem
+from game_types import Entity, FMinMax, GameObject, Graphic, SpaceMan, Vec2
+from neaty import load_genome
 from particles import ParticleSystem, StarSystem
 from renderer import Render
 from rocket import Rocket
-import globals as gl
 from utils import absolute_path, img_scaler, tuple_2_vec2
-from game_types import FMinMax, Vec2, Graphic, GameObject, Entity, SpaceMan
-from coin import CoinSystem, Coin
-from neaty import load_genome
-import math
-
-
-import pygame
 
 
 def exit_events():

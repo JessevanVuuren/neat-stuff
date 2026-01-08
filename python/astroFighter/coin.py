@@ -1,6 +1,7 @@
-from game_types import Entity, Vec2, Particle, Surface
 from random import randint
+
 import globals as gl
+from game_types import Entity, Particle, Surface, Vec2
 
 
 class Coin(Particle):

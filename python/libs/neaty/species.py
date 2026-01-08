@@ -1,6 +1,7 @@
-from .genome_history import GenomeHistory
-from .genome import Genome
 import random
+
+from .genome import Genome
+from .genome_history import GenomeHistory
 
 
 class Species:

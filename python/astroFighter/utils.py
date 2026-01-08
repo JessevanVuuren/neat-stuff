@@ -1,9 +1,10 @@
-from pygame import Vector2, Surface, transform
-from game_types import Vec2
-from colour import Color
-from typing import Tuple
-import random
 import os
+import random
+from typing import Tuple
+
+from colour import Color
+from game_types import Vec2
+from pygame import Surface, Vector2, transform
 
 
 def random_color(startC: str, endC: str, amount: int) -> str:

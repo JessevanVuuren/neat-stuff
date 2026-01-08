@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from game_types import Vec2, Surface, Particle, Graphic
-
 import pygame
+from game_types import Graphic, Particle, Surface, Vec2
 from utils import vec2_2_vector2
 
 

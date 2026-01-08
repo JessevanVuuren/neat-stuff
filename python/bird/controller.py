@@ -1,11 +1,12 @@
 from __future__ import annotations
 
+import globals as gl
+import pygame
+from bird import Bird
+from game_types import ActionState, Pipe
 from population_bird import PopulationBird
 from renderer import Render
-from game_types import ActionState, Bird, Pipe
-import globals as gl
 from utils import Sequence, abstractmethod
-import pygame
 
 
 class GameController:

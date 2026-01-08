@@ -1,5 +1,5 @@
 [GENERAL]
-parallel            = True
+parallel            = False
 workers             = 4
 save_genome         = False
 log_progress        = True

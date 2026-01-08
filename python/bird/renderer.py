@@ -1,8 +1,8 @@
-from game_types import Graphics
-import globals as gl
-
-import pygame
 import math
+
+import globals as gl
+import pygame
+from game_types import Graphics
 
 
 class Render:

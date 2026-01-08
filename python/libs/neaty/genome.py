@@ -1,10 +1,12 @@
 from __future__ import annotations
-from .config import NeatConfig
-from .genome_history import GenomeHistory
-from itertools import count
-from .gene import Gene
-from .node import Node
+
 import random
+from itertools import count
+
+from .config import NeatConfig
+from .gene import Gene
+from .genome_history import GenomeHistory
+from .node import Node
 
 
 class Genome:

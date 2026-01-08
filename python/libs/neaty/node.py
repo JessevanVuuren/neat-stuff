@@ -1,14 +1,13 @@
 from __future__ import annotations
+
+import math
+import random
 from typing import TYPE_CHECKING
 
 from .config import NeatConfig
 
-import random
-import math
-
 if TYPE_CHECKING:
-    from .gene import Gene
-    from .gene import Node
+    from .gene import Gene, Node
 
 
 class Node:

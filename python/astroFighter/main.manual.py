@@ -1,14 +1,13 @@
 from __future__ import annotations
 
+import globals as gl
+import pygame
+from coin import CoinSystem
+from game_types import FMinMax, GameObject, Graphic, Vec2
 from particles import ParticleSystem, StarSystem
 from renderer import Render
 from rocket import Rocket
-import globals as gl
 from utils import absolute_path, img_scaler, tuple_2_vec2
-from game_types import FMinMax, Vec2, Graphic, GameObject
-from coin import CoinSystem
-
-import pygame
 
 
 def exit_events():

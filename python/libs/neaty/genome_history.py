@@ -1,10 +1,12 @@
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
+
 from .config import NeatConfig
 
 if TYPE_CHECKING:
-    from .node import Node
     from .gene import Gene
+    from .node import Node
 
 
 class GenomeHistory:

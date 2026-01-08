@@ -1,8 +1,9 @@
-from multiprocessing import Pool, cpu_count
+import math
 from collections.abc import Callable
 from contextlib import closing
+from multiprocessing import Pool, cpu_count
+
 from .genome import Genome
-import math
 
 
 class MultiEvaluator:

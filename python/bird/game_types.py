@@ -1,9 +1,14 @@
 from __future__ import annotations
 
-from utils import dataclass, field, Protocol, BaseEnum, Enum
-from neaty import Genome
-from bird import Bird
+from typing import TYPE_CHECKING
+
 import pygame
+from neaty import Genome
+from utils import BaseEnum, Enum, Protocol, dataclass, field
+
+if TYPE_CHECKING:
+    from bird import Bird
+    
 
 
 @dataclass

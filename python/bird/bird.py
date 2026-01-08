@@ -1,13 +1,17 @@
 from __future__ import annotations
 
-from controller import PhysicsController, GameController
-from game_types import ActionState, Graphics, GamePlayer, Pipe, GameType
-import globals as gl
-from neaty import NeatConfig, GenomeHistory, Genome
-from utils import Sequence, tuple_2_vec2
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from controller import GameController, PhysicsController
 
 import random
+
+import globals as gl
 import pygame
+from game_types import ActionState, GamePlayer, GameType, Graphics, Pipe
+from neaty import Genome, GenomeHistory, NeatConfig
+from utils import Sequence, tuple_2_vec2
 
 
 class Bird:

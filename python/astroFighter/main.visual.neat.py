@@ -1,17 +1,16 @@
 from __future__ import annotations
 
+import math
+
+import globals as gl
+import pygame
+from coin import Coin, CoinSystem
+from game_types import Entity, FMinMax, GameObject, Genome, Graphic, SpaceMan, Vec2
+from neaty import Config, GenomeHistory, NeatConfig, Population, save_genome
 from particles import ParticleSystem, StarSystem
 from renderer import Render
 from rocket import Rocket
-from game_types import Entity, Genome, SpaceMan, GameObject, Graphic, FMinMax, Vec2
-from neaty import GenomeHistory, Population, Config, NeatConfig, save_genome
-import globals as gl
 from utils import absolute_path, img_scaler, tuple_2_vec2
-from coin import Coin, CoinSystem
-
-import pygame
-import math
-
 
 render = Render(gl.SCREEN_WIDTH, gl.SCREEN_HEIGHT, "Iosevka")
 

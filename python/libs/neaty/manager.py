@@ -1,7 +1,8 @@
-from .genome import Genome
-import pickle
 import os.path
+import pickle
 from pathlib import Path
+
+from .genome import Genome
 
 
 def save_genome(genome: Genome, dir: str) -> None:
