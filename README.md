@@ -1,16 +1,15 @@
 # Neaty stuff
 
-This repo is a collection of different use-cases and implementations with the [AI algorithm NEAT](https://nn.cs.utexas.edu/downloads/papers/stanley.ec02.pdf). The neat implementation (called neaty) used in this project is self written, which does not mean its better, its different and home made... With love. Nevertheless, this adaptation performs quite well and is able to adjust accordingly. This project is solely meant as a learning experience, not meant to be used elsewhere.
+This repo is a collection of different use-cases and implementations of the [AI algorithm NEAT](https://nn.cs.utexas.edu/downloads/papers/stanley.ec02.pdf).The NEAT implementation (called neaty) used in this project is self-written, which does not mean it’s better, it’s different and homemade… with love. Nevertheless, this adaptation performs quite well and is able to adjust accordingly. This project is solely meant as a learning experience and is not meant to be used elsewhere.
 
 ## use-cases
 
-This project includes 3 projects that uses neaty
-
+This project includes 3 projects that use neaty:
 - xor
 - flappy bird
 - astroFighter
 
-Each projects is complexer than the one before, where flappy bird is almost solved instantly, xor takes a few generations and astroFighter takes quite some time.
+Each project is more complex than the one before. Flappy bird is almost solved instantly, xor takes a few generations, and astroFighter takes quite some time.
 
 ## xor
 
@@ -31,9 +30,10 @@ Gen: 46 Fitness: 3.9999999999276397
 
 ## Flappy bird
 
-The flappy bird game exists in two flavours, a manual and automatic. manual mode is the easiest, you only have to press up or down to control the bird. If you don't press eny buttons the bird will way in place. Automatic is a bit harder and, where the controls mimic the original Flappy bird. Both are easily solved by neaty.
+The Flappy bird game exists in two flavours: manual and automatic. Manual mode is the easiest; you only have to press up or down to control the bird. If you don't press any buttons, the bird will stay in place. Automatic is a bit harder, where the controls mimic the original Flappy Bird. Both are easily solved by neaty.
 
-config can be found in `./python/bird/globals.py`
+Config can be found in `./python/bird/globals.py`
+
 ```python
 GAME_TYPE = "dynamic" # "static" = up down, "dynamic" = gravity
 GAME_PLAYER = "neat" # "manual" = human, "neat" = ai
